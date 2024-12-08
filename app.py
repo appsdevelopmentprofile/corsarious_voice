@@ -1,20 +1,29 @@
 import streamlit as st
-import os
 from gtts import gTTS  # For text-to-speech
 import speech_recognition as sr
-from playsound import playsound
+from pydub import AudioSegment
+import io
 from datetime import datetime
 
 # Define helper functions
 def play_questionnaire(questions):
-    """Play the questionnaire MP3."""
+    """Play the questionnaire using pydub."""
     for i, question in enumerate(questions, 1):
         st.info(f"Question {i}: {question}")
         tts = gTTS(text=question, lang='en')
-        mp3_filename = f"question_{i}.mp3"
-        tts.save(mp3_filename)
-        playsound(mp3_filename)
-        os.remove(mp3_filename)
+        mp3_audio = io.BytesIO()
+        tts.save(mp3_audio)
+        mp3_audio.seek(0)
+        
+        # Convert the MP3 into a playable format using pydub
+        audio = AudioSegment.from_mp3(mp3_audio)
+        audio.export("temp.wav", format="wav")
+        
+        # Stream the audio as WAV file for playback
+        st.audio("temp.wav", format="audio/wav")
+        
+        # Optional: Delete temporary file
+        os.remove("temp.wav")
 
 def record_responses(questions):
     """Record engineer responses to each question."""
