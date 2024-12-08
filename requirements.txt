@@ -2,5 +2,5 @@ streamlit
 gtts==2.2.3
 SpeechRecognition==3.8.1
 playsound==1.2.2
-gobject-introspection
-pygobject
+gobject-introspection==1.68.0
+pygobject==3.40.1
