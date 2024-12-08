@@ -1,4 +1,4 @@
 streamlit
-gtts
-SpeechRecognition
-playsound
+gtts==2.2.3
+SpeechRecognition==3.8.1
+playsound==1.2.2
