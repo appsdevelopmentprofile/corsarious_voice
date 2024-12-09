@@ -1,3 +1,4 @@
+import os
 import streamlit as st
 from gtts import gTTS  # For text-to-speech
 import speech_recognition as sr
@@ -6,6 +7,19 @@ import io
 from datetime import datetime
 
 # Define helper functions
+def combine_ffmpeg_parts():
+    """Combine ffmpeg split parts (if applicable)"""
+    ffmpeg_path = "/content/ffmpeg_part_aa"  # Path to the ffmpeg part in your GitHub directory
+    # Assuming ffmpeg_part_aa is part of a larger file or archive, you would need to merge it here
+    # For this example, I'll assume it's a standalone executable, so no combination is needed
+    
+    if os.path.exists(ffmpeg_path):
+        st.info(f"ffmpeg found: {ffmpeg_path}")
+        return ffmpeg_path
+    else:
+        st.error("ffmpeg not found, please check the directory.")
+        return None
+
 def play_questionnaire(questions):
     """Play the questionnaire using pydub."""
     for i, question in enumerate(questions, 1):
@@ -39,7 +53,7 @@ def record_responses(questions):
                 responses.append(response)
                 st.success(f"Recorded response: {response}")
             except sr.UnknownValueError:
-                st.warning("Could not understand the audio.")
+                st.warning(f"Could not understand the audio for Question {i}.")
                 responses.append("N/A")
             except sr.RequestError as e:
                 st.error(f"Error with the speech recognition service: {e}")
@@ -63,6 +77,11 @@ questions = [
     "What is the type of equipment?",
     "What is the label of the equipment or tag of the process?"
 ]
+
+# Load ffmpeg if needed (make sure it's accessible from your repository or environment)
+ffmpeg_path = combine_ffmpeg_parts()  # Path to the ffmpeg part or file in your GitHub directory
+if ffmpeg_path:
+    st.info(f"FFmpeg found at: {ffmpeg_path}")
 
 # Start the process
 if st.button("Start Virtual Assistant"):
