@@ -3,7 +3,7 @@ import soundfile as sf
 import os
 import wave
 from datetime import datetime
-from streamlit_webrtc import webrtc_streamer, WebRtcMode
+from streamlit_webrtc import webrtc_streamer, WebRtcMode, WebRtcStreamerContext
 import numpy as np
 
 # Function 1: Play "engineer_diagnosis.wav" file from GitHub repo (local directory)
@@ -15,10 +15,10 @@ def play_engineer_diagnosis():
     else:
         st.error("File 'engineer_diagnosis.wav' not found!")
 
-# Function 2: Record voice, save as WAV, and allow playback
+# Function 2: Record voice, save as wav, and allow playback
 def record_voice():
     st.header("Function 2: Record Voice")
-    
+
     # Using WebRTC for real-time audio recording
     webrtc_ctx = webrtc_streamer(
         key="record-voice",
@@ -26,29 +26,26 @@ def record_voice():
         rtc_configuration={"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]},
         media_stream_constraints={"audio": True, "video": False},
     )
-    
-    if webrtc_ctx and webrtc_ctx.state.playing:
-        audio_frames = []
-        sample_rate = 16000  # Default sample rate
 
-        # Placeholder for actual audio recording logic
-        st.write("Recording... Speak into your microphone.")
+    # A variable to hold recorded audio data in chunks
+    audio_frames = []
+    sample_rate = 16000  # Set the sample rate for audio recording
 
-        # Collect audio frames and store them for saving
-        for audio_frame in webrtc_ctx.audio_frames:
-            audio_frames.append(audio_frame)
-        
-        if audio_frames:
-            audio_data = np.concatenate(audio_frames)
+    # If the context is active, keep recording
+    while webrtc_ctx and webrtc_ctx.state.playing:
+        # Capture audio frames
+        if webrtc_ctx.audio_frames:
+            audio_frames.extend(webrtc_ctx.audio_frames)
 
-            # Save as a WAV file
-            file_name = f"recording_{datetime.now().strftime('%Y%m%d_%H%M%S')}.wav"
-            sf.write(file_name, audio_data, sample_rate)
-
-            st.success(f"Audio recorded and saved as {file_name}")
-            st.audio(file_name, format="audio/wav")
-        else:
-            st.warning("No audio data available. Ensure your microphone is active.")
+        # When recording is done or user stops the app, save the file
+        if not webrtc_ctx.state.playing:
+            if audio_frames:
+                audio_data = np.concatenate(audio_frames)
+                file_name = f"recording_{datetime.now().strftime('%Y%m%d_%H%M%S')}.wav"
+                sf.write(file_name, audio_data, sample_rate)
+                st.success(f"Audio recorded and saved as {file_name}")
+                st.audio(file_name, format="audio/wav")
+                break  # Exit the loop once recording is done
 
 # Function 3: Play "electric_unit_heater.wav" file from GitHub repo (local directory)
 def play_electric_unit_heater():
@@ -63,11 +60,6 @@ def play_electric_unit_heater():
 st.title("Audio Demo App")
 
 # Sequential execution of functions
-if st.button("Start Function 1: Play 'engineer_diagnosis.wav'"):
-    play_engineer_diagnosis()
-
-if st.button("Start Function 2: Record Voice"):
-    record_voice()
-
-if st.button("Start Function 3: Play 'electric_unit_heater.wav'"):
-    play_electric_unit_heater()
+play_engineer_diagnosis()
+record_voice()  # Start the recording function when the app loads
+play_electric_unit_heater()
