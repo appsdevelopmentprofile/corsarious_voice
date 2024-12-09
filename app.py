@@ -9,9 +9,9 @@ from datetime import datetime
 # Define helper functions
 def combine_ffmpeg_parts():
     """Combine ffmpeg split parts (if applicable)"""
-    ffmpeg_part_aa_path = "/content/ffmpeg_part_aa"  # Path to the first part
-    ffmpeg_part_ab_path = "/content/ffmpeg_part_ab"  # Path to the second part (if it exists)
-    combined_ffmpeg_path = "/content/ffmpeg"
+    ffmpeg_part_aa_path = "ffmpeg_part_aa"  # Path to the first part (in the same directory as app.py)
+    ffmpeg_part_ab_path = "ffmpeg_part_ab"  # Path to the second part (in the same directory as app.py)
+    combined_ffmpeg_path = "ffmpeg"  # The name for the combined ffmpeg file
 
     # Ensure both parts exist before combining
     if os.path.exists(ffmpeg_part_aa_path) and os.path.exists(ffmpeg_part_ab_path):
