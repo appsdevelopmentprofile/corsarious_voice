@@ -2,27 +2,31 @@ import os
 import streamlit as st
 from gtts import gTTS  # For text-to-speech
 import speech_recognition as sr
-from pydub import AudioSegment
+import soundfile as sf
 import io
 from datetime import datetime
+import pathlib
+import pygame
 import shutil
-import subprocess
 
-# Define helper functions
+
+# Helper function to combine ffprobe parts
 def combine_ffprobe_parts():
     """Combine ffprobe split parts (if applicable)"""
     # Paths to the ffprobe split parts in the GitHub repository
-    ffprobe_part_aa_path = "ffprobe_part_aa"  # Path to the first part
-    ffprobe_part_ab_path = "ffprobe_part_ab"  # Path to the second part
-    combined_ffprobe_path = "ffprobe"  # The name for the combined ffprobe file
+    ffprobe_part_aa_path = pathlib.Path("ffprobe_part_aa")  # Path to the first part
+    ffprobe_part_ab_path = pathlib.Path("ffprobe_part_ab")  # Path to the second part
+    combined_ffprobe_path = pathlib.Path("ffprobe")  # The name for the combined ffprobe file
 
     # Check if both parts exist
-    if os.path.exists(ffprobe_part_aa_path) and os.path.exists(ffprobe_part_ab_path):
+    if ffprobe_part_aa_path.exists() and ffprobe_part_ab_path.exists():
         try:
-            # Use shutil to copy the contents of both parts into the combined file
+            # Use shutil to combine parts directly
             with open(combined_ffprobe_path, "wb") as combined_file:
-                shutil.copyfileobj(open(ffprobe_part_aa_path, 'rb'), combined_file)
-                shutil.copyfileobj(open(ffprobe_part_ab_path, 'rb'), combined_file)
+                with open(ffprobe_part_aa_path, "rb") as part_aa:
+                    shutil.copyfileobj(part_aa, combined_file)
+                with open(ffprobe_part_ab_path, "rb") as part_ab:
+                    shutil.copyfileobj(part_ab, combined_file)
             st.info(f"ffprobe parts combined into {combined_ffprobe_path}")
             return combined_ffprobe_path
         except Exception as e:
@@ -32,8 +36,10 @@ def combine_ffprobe_parts():
         st.error("ffprobe part files are missing!")
         return None
 
+
+# Function to play the questions via gTTS and stream audio
 def play_questionnaire(questions):
-    """Play the questionnaire using pydub."""
+    """Play the questionnaire using gTTS and soundfile."""
     for i, question in enumerate(questions, 1):
         st.info(f"Question {i}: {question}")
         tts = gTTS(text=question, lang='en')
@@ -41,16 +47,26 @@ def play_questionnaire(questions):
         tts.save(mp3_audio)
         mp3_audio.seek(0)
         
-        # Convert the MP3 into a playable format using pydub
-        audio = AudioSegment.from_mp3(mp3_audio)
-        audio.export("temp.wav", format="wav")
+        # Convert MP3 to WAV format using soundfile
+        wav_audio_path = "temp.wav"
+        with open(wav_audio_path, "wb") as temp_wav:
+            mp3_audio.seek(0)
+            temp_wav.write(mp3_audio.read())
         
-        # Stream the audio as WAV file for playback
-        st.audio("temp.wav", format="audio/wav")
-        
-        # Optional: Delete temporary file
-        os.remove("temp.wav")
+        # Play audio using pygame mixer
+        pygame.mixer.init()
+        pygame.mixer.music.load(wav_audio_path)
+        pygame.mixer.music.play()
 
+        # Wait for the audio to finish before proceeding
+        while pygame.mixer.music.get_busy():
+            pygame.time.Clock().tick(10)
+
+        # Optional: Delete temporary file after playback
+        os.remove(wav_audio_path)
+
+
+# Function to record responses using speech recognition
 def record_responses(questions):
     """Record engineer responses to each question."""
     recognizer = sr.Recognizer()
@@ -73,12 +89,15 @@ def record_responses(questions):
     
     return responses
 
+
+# Function to save responses as MP3
 def save_responses_as_mp3(responses, filename):
     """Save responses as an MP3 file."""
     response_text = "\n".join(responses)
     tts = gTTS(text=response_text, lang='en')
     tts.save(filename)
     st.success(f"Responses saved as {filename}")
+
 
 # Streamlit Interface
 st.title("Virtual Assistant for Project Checklist")
