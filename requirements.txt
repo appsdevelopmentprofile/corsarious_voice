@@ -1,4 +1,5 @@
+gTTS
+pydub
+speechrecognition
+gitpython
 streamlit
-gtts==2.2.3
-speechrecognition==3.8.1
-pydub==0.25.1
