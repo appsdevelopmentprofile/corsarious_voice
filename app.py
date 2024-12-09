@@ -9,15 +9,20 @@ from datetime import datetime
 # Define helper functions
 def combine_ffprobe_parts():
     """Combine ffprobe split parts (if applicable)"""
-    # Reference to the files in the same GitHub directory as app.py
+    # Paths to the ffprobe split parts in the GitHub repository
     ffprobe_part_aa_path = "ffprobe_part_aa"  # Path to the first part
     ffprobe_part_ab_path = "ffprobe_part_ab"  # Path to the second part
     combined_ffprobe_path = "ffprobe"  # The name for the combined ffprobe file
-
-    # Ensure both parts exist before combining
+    
+    # Check if both parts exist
     if os.path.exists(ffprobe_part_aa_path) and os.path.exists(ffprobe_part_ab_path):
-        # Combine parts using 'cat' command (Linux-based systems)
-        os.system(f"cat {ffprobe_part_aa_path} {ffprobe_part_ab_path} > {combined_ffprobe_path}")
+        # Open both parts and combine them into a single file
+        with open(combined_ffprobe_path, "wb") as combined_file:
+            with open(ffprobe_part_aa_path, "rb") as part_aa:
+                combined_file.write(part_aa.read())
+            with open(ffprobe_part_ab_path, "rb") as part_ab:
+                combined_file.write(part_ab.read())
+        
         st.info(f"ffprobe parts combined into {combined_ffprobe_path}")
         return combined_ffprobe_path
     else:
