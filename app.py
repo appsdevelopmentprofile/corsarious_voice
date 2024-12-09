@@ -2,7 +2,7 @@ import streamlit as st
 import soundfile as sf
 import os
 from datetime import datetime
-from streamlit_webrtc import webrtc_streamer, WebRtcMode, WebRtcStreamerContext
+from streamlit_webrtc import webrtc_streamer, WebRtcMode
 import numpy as np
 
 # Function 1: Play "engineer_diagnosis.wav" file from GitHub repo (local directory)
@@ -14,11 +14,10 @@ def play_engineer_diagnosis():
     else:
         st.error("File 'engineer_diagnosis.wav' not found!")
 
-# Function 2: Record voice, save as wav, and allow playback
+# Function 2: Continuously record voice, save as wav, and allow playback
 def record_voice():
     st.header("Function 2: Record Voice")
-    st.write("Click the button below to start recording your voice.")
-    
+
     # Using WebRTC for real-time audio recording
     webrtc_ctx = webrtc_streamer(
         key="record-voice",
@@ -28,10 +27,9 @@ def record_voice():
     )
 
     if webrtc_ctx and webrtc_ctx.state.playing:
-        # Wait for user input to stop recording
         st.write("Recording... Speak into your microphone.")
         
-        # Retrieve audio data from the WebRTC context
+        # Retrieve audio frames and process
         audio_frames = webrtc_ctx.audio_frames
         if audio_frames:
             audio_data = np.concatenate(audio_frames)
@@ -44,10 +42,7 @@ def record_voice():
             st.success(f"Audio recorded and saved as {file_name}")
             st.audio(file_name, format="audio/wav")
         else:
-            st.warning("No audio recorded. Please try again.")
-    
-    else:
-        st.warning("Press the button to start recording.")
+            st.warning("No audio data available. Make sure your microphone is active.")
 
 # Function 3: Play "electric_unit_heater.wav" file from GitHub repo (local directory)
 def play_electric_unit_heater():
@@ -61,12 +56,12 @@ def play_electric_unit_heater():
 # Main App
 st.title("Audio Demo App")
 
-# Sequential execution of functions
+# Initialize the recording function to run as soon as the app starts
+record_voice()
+
+# Display buttons for other functions
 if st.button("Start Function 1: Play 'engineer_diagnosis.wav'"):
     play_engineer_diagnosis()
-
-if st.button("Start Function 2: Record Voice"):
-    record_voice()
 
 if st.button("Start Function 3: Play 'electric_unit_heater.wav'"):
     play_electric_unit_heater()
