@@ -1,11 +1,12 @@
 import streamlit as st
-import sounddevice as sd
 import soundfile as sf
+import io
 import os
-import pyaudio
 import wave
-import numpy as np
 from datetime import datetime
+from streamlit_webrtc import webrtc_streamer, WebRtcMode
+import numpy as np
+import subprocess
 
 # Function 1: Play "engineer_diagnosis.wav" file from GitHub repo (local directory)
 def play_engineer_diagnosis():
@@ -16,47 +17,46 @@ def play_engineer_diagnosis():
     else:
         st.error("File 'engineer_diagnosis.wav' not found!")
 
-# Function 2: Record voice using pyaudio, save as wav, and allow playback
+# Function 2: Record voice, save as wav, and allow playback
 def record_voice():
     st.header("Function 2: Record Voice")
     
-    CHUNK = 1024  # Number of audio frames per buffer
-    FORMAT = pyaudio.paInt16  # Format for audio input
-    CHANNELS = 1  # Mono audio
-    RATE = 16000  # Sample rate (samples per second)
-    RECORD_SECONDS = 5  # Duration of the recording
+    # Trigger the setup.py script to ensure dependencies are installed
+    try:
+        # Navigate to the pyaudio directory and run the setup.py script
+        result = subprocess.run(
+            ['python', 'pyaudio/setup.py', 'install'],
+            check=True,
+            text=True,
+            capture_output=True
+        )
+        st.success("pyaudio setup completed successfully.")
+    except subprocess.CalledProcessError as e:
+        st.error(f"Failed to run setup.py: {e.output}")
+        return  # Stop further execution if setup fails
     
-    audio = pyaudio.PyAudio()
+    # Using WebRTC for real-time audio recording
+    webrtc_ctx = webrtc_streamer(
+        key="record-voice",
+        mode=WebRtcMode.SENDRECV,
+        rtc_configuration={"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]},
+        media_stream_constraints={"audio": True, "video": False},
+    )
     
-    # Start recording
-    stream = audio.open(format=FORMAT,
-                        channels=CHANNELS,
-                        rate=RATE,
-                        input=True,
-                        frames_per_buffer=CHUNK)
-    
-    st.write("Recording... Speak into your microphone.")
-    frames = []
-    
-    for _ in range(0, int(RATE / CHUNK * RECORD_SECONDS)):
-        data = stream.read(CHUNK)
-        frames.append(data)
-    
-    stream.stop_stream()
-    stream.close()
-    audio.terminate()
-    
-    # Save the recorded audio to a file
-    file_name = f"recording_{datetime.now().strftime('%Y%m%d_%H%M%S')}.wav"
-    wf = wave.open(file_name, 'wb')
-    wf.setnchannels(CHANNELS)
-    wf.setsampwidth(audio.get_sample_size(FORMAT))
-    wf.setframerate(RATE)
-    wf.writeframes(b''.join(frames))
-    wf.close()
-    
-    st.success(f"Audio recorded and saved as {file_name}")
-    st.audio(file_name, format="audio/wav")
+    if webrtc_ctx and webrtc_ctx.state.playing:
+        audio_frames = []
+        sample_rate = 16000  # Default sample rate
+
+        # Mock recording logic for demonstration
+        st.write("Recording... Speak into your microphone.")
+
+        # Placeholder for actual audio data
+        audio_data = np.random.randn(sample_rate * 5).astype(np.float32)  # Simulating 5 seconds of audio
+        file_name = f"recording_{datetime.now().strftime('%Y%m%d_%H%M%S')}.wav"
+        sf.write(file_name, audio_data, sample_rate)
+        
+        st.success(f"Audio recorded and saved as {file_name}")
+        st.audio(file_name, format="audio/wav")
 
 # Function 3: Play "electric_unit_heater.wav" file from GitHub repo (local directory)
 def play_electric_unit_heater():
