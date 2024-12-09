@@ -5,17 +5,29 @@ import speech_recognition as sr
 from pydub import AudioSegment
 import io
 from datetime import datetime
+import git
 
 # Define helper functions
+def clone_repo():
+    """Clone the GitHub repository to the local directory"""
+    repo_url = "https://github.com/appsdevelopmentprofile/corsarious_voice.git"
+    repo_dir = "/app/corsarious_voice"  # Directory where repo should be cloned
+    
+    if not os.path.exists(repo_dir):
+        st.info("Cloning GitHub repository...")
+        git.Repo.clone_from(repo_url, repo_dir)
+    else:
+        st.info("Repository already cloned.")
+
 def combine_ffprobe_parts():
     """Combine ffprobe split parts (if applicable)"""
-    ffprobe_part_aa_path = "ffprobe_part_aa"  # Path to the first part (in the same directory as app.py)
-    ffprobe_part_ab_path = "ffprobe_part_ab"  # Path to the second part (in the same directory as app.py)
-    combined_ffprobe_path = "ffprobe"  # The name for the combined ffprobe file
+    ffprobe_part_aa_path = "/app/corsarious_voice/ffprobe_part_aa"  # Path to the first part (in the cloned repo)
+    ffprobe_part_ab_path = "/app/corsarious_voice/ffprobe_part_ab"  # Path to the second part (in the cloned repo)
+    combined_ffprobe_path = "/app/corsarious_voice/ffprobe"  # The name for the combined ffprobe file
 
     # Ensure both parts exist before combining
     if os.path.exists(ffprobe_part_aa_path) and os.path.exists(ffprobe_part_ab_path):
-        # Combine parts using 'cat' command
+        # Combine parts using 'cat' command (Linux-based systems)
         os.system(f"cat {ffprobe_part_aa_path} {ffprobe_part_ab_path} > {combined_ffprobe_path}")
         st.info(f"ffprobe parts combined into {combined_ffprobe_path}")
         return combined_ffprobe_path
@@ -80,6 +92,9 @@ questions = [
     "What is the type of equipment?",
     "What is the label of the equipment or tag of the process?"
 ]
+
+# Clone GitHub repo if not already cloned
+clone_repo()
 
 # Load ffprobe if needed (combine the parts if they exist)
 ffprobe_path = combine_ffprobe_parts()  # Path to the combined ffprobe file
