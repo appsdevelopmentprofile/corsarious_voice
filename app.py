@@ -1,6 +1,5 @@
 import streamlit as st
 import soundfile as sf
-import pydub
 import os
 import wave
 from datetime import datetime
@@ -16,10 +15,10 @@ def play_engineer_diagnosis():
     else:
         st.error("File 'engineer_diagnosis.wav' not found!")
 
-# Function 2: Record voice, save as MP3, and allow playback
+# Function 2: Record voice, save as WAV, and allow playback
 def record_voice():
     st.header("Function 2: Record Voice")
-
+    
     # Using WebRTC for real-time audio recording
     webrtc_ctx = webrtc_streamer(
         key="record-voice",
@@ -27,34 +26,27 @@ def record_voice():
         rtc_configuration={"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]},
         media_stream_constraints={"audio": True, "video": False},
     )
-
+    
     if webrtc_ctx and webrtc_ctx.state.playing:
-        st.write("Recording... Speak into your microphone.")
         audio_frames = []
+        sample_rate = 16000  # Default sample rate
 
-        # Collect audio data in real-time
+        # Placeholder for actual audio recording logic
+        st.write("Recording... Speak into your microphone.")
+
+        # Collect audio frames and store them for saving
         for audio_frame in webrtc_ctx.audio_frames:
             audio_frames.append(audio_frame)
-
+        
         if audio_frames:
-            # Combine audio frames into a single NumPy array
             audio_data = np.concatenate(audio_frames)
-            sample_rate = 16000  # Adjust if necessary
 
-            # Save the audio data as a WAV file temporarily
-            temp_wav_file = f"temp_recording_{datetime.now().strftime('%Y%m%d_%H%M%S')}.wav"
-            sf.write(temp_wav_file, audio_data, sample_rate)
+            # Save as a WAV file
+            file_name = f"recording_{datetime.now().strftime('%Y%m%d_%H%M%S')}.wav"
+            sf.write(file_name, audio_data, sample_rate)
 
-            # Convert the WAV file to MP3 format using pydub
-            mp3_file_name = temp_wav_file.replace(".wav", ".mp3")
-            audio_segment = pydub.AudioSegment.from_wav(temp_wav_file)
-            audio_segment.export(mp3_file_name, format="mp3")
-
-            # Clean up the temporary WAV file
-            os.remove(temp_wav_file)
-
-            st.success(f"Audio recorded and saved as {mp3_file_name}")
-            st.audio(mp3_file_name, format="audio/mp3")
+            st.success(f"Audio recorded and saved as {file_name}")
+            st.audio(file_name, format="audio/wav")
         else:
             st.warning("No audio data available. Ensure your microphone is active.")
 
