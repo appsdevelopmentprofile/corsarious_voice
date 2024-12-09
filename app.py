@@ -1,7 +1,7 @@
 import streamlit as st
 from streamlit_webrtc import webrtc_streamer, WebRtcMode, ClientSettings
-import soundfile as sf
 import numpy as np
+import soundfile as sf
 import os
 from datetime import datetime
 
@@ -17,11 +17,8 @@ def play_engineer_diagnosis():
 # Function 2: Record voice, save as WAV, and allow playback
 def record_voice():
     st.header("Function 2: Record Voice")
-
-    # Using WebRTC for audio recording
-    def audio_callback(frame: np.ndarray, sample_rate: int):
-        return frame, sample_rate
-
+    
+    # Using WebRTC for real-time audio recording
     webrtc_ctx = webrtc_streamer(
         key="record-voice",
         mode=WebRtcMode.SENDRECV,
@@ -29,14 +26,12 @@ def record_voice():
             rtc_configuration={"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]},
             media_stream_constraints={"audio": True, "video": False},
         ),
-        audio_receiver_size=1024,
-        sendback_audio=False,
     )
-
+    
     if webrtc_ctx and webrtc_ctx.audio_receiver:
         audio_frames = []
         sample_rate = None
-
+        
         # Fetch audio frames
         while True:
             try:
@@ -46,7 +41,7 @@ def record_voice():
                 audio_frames.append(audio_frame.to_ndarray())
             except:
                 break
-
+        
         if audio_frames:
             # Combine and save audio
             audio_data = np.concatenate(audio_frames, axis=0)
