@@ -2,6 +2,7 @@ import streamlit as st
 import sounddevice as sd
 import soundfile as sf
 import os
+import pyaudio
 import wave
 import numpy as np
 from datetime import datetime
@@ -15,29 +16,47 @@ def play_engineer_diagnosis():
     else:
         st.error("File 'engineer_diagnosis.wav' not found!")
 
-# Function 2: Record voice, save as wav, and allow playback
+# Function 2: Record voice using pyaudio, save as wav, and allow playback
 def record_voice():
     st.header("Function 2: Record Voice")
     
-    # Recording parameters
-    sample_rate = 44100  # Sample rate in Hz
-    duration = 5  # Duration of recording in seconds
-
-    st.write("Press the button below to start recording.")
+    CHUNK = 1024  # Number of audio frames per buffer
+    FORMAT = pyaudio.paInt16  # Format for audio input
+    CHANNELS = 1  # Mono audio
+    RATE = 16000  # Sample rate (samples per second)
+    RECORD_SECONDS = 5  # Duration of the recording
     
-    if st.button("Start Recording"):
-        st.write("Recording... Speak into your microphone.")
-        
-        # Record the audio
-        audio_data = sd.rec(int(duration * sample_rate), samplerate=sample_rate, channels=1, dtype='int16')
-        sd.wait()  # Wait until the recording is finished
-
-        # Save the recorded audio to a file
-        file_name = f"recording_{datetime.now().strftime('%Y%m%d_%H%M%S')}.wav"
-        sf.write(file_name, audio_data, sample_rate)
-
-        st.success(f"Audio recorded and saved as {file_name}")
-        st.audio(file_name, format="audio/wav")
+    audio = pyaudio.PyAudio()
+    
+    # Start recording
+    stream = audio.open(format=FORMAT,
+                        channels=CHANNELS,
+                        rate=RATE,
+                        input=True,
+                        frames_per_buffer=CHUNK)
+    
+    st.write("Recording... Speak into your microphone.")
+    frames = []
+    
+    for _ in range(0, int(RATE / CHUNK * RECORD_SECONDS)):
+        data = stream.read(CHUNK)
+        frames.append(data)
+    
+    stream.stop_stream()
+    stream.close()
+    audio.terminate()
+    
+    # Save the recorded audio to a file
+    file_name = f"recording_{datetime.now().strftime('%Y%m%d_%H%M%S')}.wav"
+    wf = wave.open(file_name, 'wb')
+    wf.setnchannels(CHANNELS)
+    wf.setsampwidth(audio.get_sample_size(FORMAT))
+    wf.setframerate(RATE)
+    wf.writeframes(b''.join(frames))
+    wf.close()
+    
+    st.success(f"Audio recorded and saved as {file_name}")
+    st.audio(file_name, format="audio/wav")
 
 # Function 3: Play "electric_unit_heater.wav" file from GitHub repo (local directory)
 def play_electric_unit_heater():
