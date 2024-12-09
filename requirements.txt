@@ -1,2 +1,4 @@
 streamlit
+streamlit-webrtc
 soundfile
+numpy
