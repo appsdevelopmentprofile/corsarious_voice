@@ -1,5 +1,2 @@
-gTTS==2.3.0
-pygame==2.5.0
-speechrecognition==3.8.1
-soundfile==0.10.3.post1
-streamlit==1.22.0
+streamlit
+soundfile
