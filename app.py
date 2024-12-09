@@ -9,15 +9,18 @@ from datetime import datetime
 # Define helper functions
 def combine_ffmpeg_parts():
     """Combine ffmpeg split parts (if applicable)"""
-    ffmpeg_path = "/content/ffmpeg_part_aa"  # Path to the ffmpeg part in your GitHub directory
-    # Assuming ffmpeg_part_aa is part of a larger file or archive, you would need to merge it here
-    # For this example, I'll assume it's a standalone executable, so no combination is needed
-    
-    if os.path.exists(ffmpeg_path):
-        st.info(f"ffmpeg found: {ffmpeg_path}")
-        return ffmpeg_path
+    ffmpeg_part_aa_path = "/content/ffmpeg_part_aa"  # Path to the first part
+    ffmpeg_part_ab_path = "/content/ffmpeg_part_ab"  # Path to the second part (if it exists)
+    combined_ffmpeg_path = "/content/ffmpeg"
+
+    # Ensure both parts exist before combining
+    if os.path.exists(ffmpeg_part_aa_path) and os.path.exists(ffmpeg_part_ab_path):
+        # Combine parts using 'cat' command
+        os.system(f"cat {ffmpeg_part_aa_path} {ffmpeg_part_ab_path} > {combined_ffmpeg_path}")
+        st.info(f"ffmpeg parts combined into {combined_ffmpeg_path}")
+        return combined_ffmpeg_path
     else:
-        st.error("ffmpeg not found, please check the directory.")
+        st.error("ffmpeg part files are missing!")
         return None
 
 def play_questionnaire(questions):
@@ -78,8 +81,8 @@ questions = [
     "What is the label of the equipment or tag of the process?"
 ]
 
-# Load ffmpeg if needed (make sure it's accessible from your repository or environment)
-ffmpeg_path = combine_ffmpeg_parts()  # Path to the ffmpeg part or file in your GitHub directory
+# Load ffmpeg if needed (combine the parts if they exist)
+ffmpeg_path = combine_ffmpeg_parts()  # Path to the combined ffmpeg file
 if ffmpeg_path:
     st.info(f"FFmpeg found at: {ffmpeg_path}")
 
