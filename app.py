@@ -1,6 +1,8 @@
 import streamlit as st
 import soundfile as sf
+import pydub
 import os
+import wave
 from datetime import datetime
 from streamlit_webrtc import webrtc_streamer, WebRtcMode
 import numpy as np
@@ -14,7 +16,7 @@ def play_engineer_diagnosis():
     else:
         st.error("File 'engineer_diagnosis.wav' not found!")
 
-# Function 2: Continuously record voice, save as wav, and allow playback
+# Function 2: Record voice, save as MP3, and allow playback
 def record_voice():
     st.header("Function 2: Record Voice")
 
@@ -28,21 +30,33 @@ def record_voice():
 
     if webrtc_ctx and webrtc_ctx.state.playing:
         st.write("Recording... Speak into your microphone.")
-        
-        # Retrieve audio frames and process
-        audio_frames = webrtc_ctx.audio_frames
-        if audio_frames:
-            audio_data = np.concatenate(audio_frames)
-            sample_rate = 16000  # Adjust if needed
+        audio_frames = []
 
-            # Save the recording to a file
-            file_name = f"recording_{datetime.now().strftime('%Y%m%d_%H%M%S')}.wav"
-            sf.write(file_name, audio_data, sample_rate)
-            
-            st.success(f"Audio recorded and saved as {file_name}")
-            st.audio(file_name, format="audio/wav")
+        # Collect audio data in real-time
+        for audio_frame in webrtc_ctx.audio_frames:
+            audio_frames.append(audio_frame)
+
+        if audio_frames:
+            # Combine audio frames into a single NumPy array
+            audio_data = np.concatenate(audio_frames)
+            sample_rate = 16000  # Adjust if necessary
+
+            # Save the audio data as a WAV file temporarily
+            temp_wav_file = f"temp_recording_{datetime.now().strftime('%Y%m%d_%H%M%S')}.wav"
+            sf.write(temp_wav_file, audio_data, sample_rate)
+
+            # Convert the WAV file to MP3 format using pydub
+            mp3_file_name = temp_wav_file.replace(".wav", ".mp3")
+            audio_segment = pydub.AudioSegment.from_wav(temp_wav_file)
+            audio_segment.export(mp3_file_name, format="mp3")
+
+            # Clean up the temporary WAV file
+            os.remove(temp_wav_file)
+
+            st.success(f"Audio recorded and saved as {mp3_file_name}")
+            st.audio(mp3_file_name, format="audio/mp3")
         else:
-            st.warning("No audio data available. Make sure your microphone is active.")
+            st.warning("No audio data available. Ensure your microphone is active.")
 
 # Function 3: Play "electric_unit_heater.wav" file from GitHub repo (local directory)
 def play_electric_unit_heater():
@@ -56,12 +70,12 @@ def play_electric_unit_heater():
 # Main App
 st.title("Audio Demo App")
 
-# Initialize the recording function to run as soon as the app starts
-record_voice()
-
-# Display buttons for other functions
+# Sequential execution of functions
 if st.button("Start Function 1: Play 'engineer_diagnosis.wav'"):
     play_engineer_diagnosis()
+
+if st.button("Start Function 2: Record Voice"):
+    record_voice()
 
 if st.button("Start Function 3: Play 'electric_unit_heater.wav'"):
     play_electric_unit_heater()
