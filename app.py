@@ -15,18 +15,38 @@ def play_engineer_diagnosis():
         st.error("File 'engineer_diagnosis.wav' not found!")
 
 # Function 2: Record voice, save as wav, and allow playback
+class AudioProcessor(AudioProcessorBase):
+    def __init__(self):
+        self.audio_frames = []
+
+    def recv_audio(self, frame):
+        self.audio_frames.append(frame.to_ndarray())
+        return frame
+
 def record_voice():
     st.header("Function 2: Record Voice")
     
-    audio_file = st.file_uploader("Upload your voice (WAV format only)", type=["wav"])
-    if audio_file is not None:
-        # Save the recorded audio as WAV
-        file_name = f"recording_{datetime.now().strftime('%Y%m%d_%H%M%S')}.wav"
-        with open(file_name, "wb") as f:
-            f.write(audio_file.read())
+    audio_processor = webrtc_streamer(
+        key="voice-recorder",
+        mode=WebRtcMode.SENDONLY,
+        client_settings=ClientSettings(
+            rtc_configuration={"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]},
+            media_stream_constraints={"audio": True, "video": False},
+        ),
+        audio_processor_factory=AudioProcessor,
+    )
+
+    if audio_processor and audio_processor.audio_frames:
+        # Save the recorded audio
+        audio_frames = audio_processor.audio_frames
+        audio_file_path = f"recording_{datetime.now().strftime('%Y%m%d_%H%M%S')}.wav"
         
-        st.success(f"Audio recorded and saved as {file_name}")
-        st.audio(file_name, format="audio/wav")
+        with sf.SoundFile(audio_file_path, mode='w', samplerate=44100, channels=1, subtype="PCM_16") as f:
+            for frame in audio_frames:
+                f.write(frame)
+        
+        st.success(f"Audio recorded and saved as {audio_file_path}")
+        st.audio(audio_file_path, format="audio/wav")
 
 # Function 3: Play "electric_unit_heater.wav" file from GitHub repo (local directory)
 def play_electric_unit_heater():
