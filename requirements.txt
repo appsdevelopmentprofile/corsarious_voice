@@ -2,4 +2,4 @@ streamlit
 streamlit-webrtc
 soundfile
 numpy
-pyaudio==0.2.11
+pyaudio
