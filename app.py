@@ -5,6 +5,8 @@ import speech_recognition as sr
 from pydub import AudioSegment
 import io
 from datetime import datetime
+import shutil
+import subprocess
 
 # Define helper functions
 def combine_ffprobe_parts():
@@ -13,18 +15,19 @@ def combine_ffprobe_parts():
     ffprobe_part_aa_path = "ffprobe_part_aa"  # Path to the first part
     ffprobe_part_ab_path = "ffprobe_part_ab"  # Path to the second part
     combined_ffprobe_path = "ffprobe"  # The name for the combined ffprobe file
-    
+
     # Check if both parts exist
     if os.path.exists(ffprobe_part_aa_path) and os.path.exists(ffprobe_part_ab_path):
-        # Open both parts and combine them into a single file
-        with open(combined_ffprobe_path, "wb") as combined_file:
-            with open(ffprobe_part_aa_path, "rb") as part_aa:
-                combined_file.write(part_aa.read())
-            with open(ffprobe_part_ab_path, "rb") as part_ab:
-                combined_file.write(part_ab.read())
-        
-        st.info(f"ffprobe parts combined into {combined_ffprobe_path}")
-        return combined_ffprobe_path
+        try:
+            # Use shutil to copy the contents of both parts into the combined file
+            with open(combined_ffprobe_path, "wb") as combined_file:
+                shutil.copyfileobj(open(ffprobe_part_aa_path, 'rb'), combined_file)
+                shutil.copyfileobj(open(ffprobe_part_ab_path, 'rb'), combined_file)
+            st.info(f"ffprobe parts combined into {combined_ffprobe_path}")
+            return combined_ffprobe_path
+        except Exception as e:
+            st.error(f"An error occurred while combining ffprobe parts: {e}")
+            return None
     else:
         st.error("ffprobe part files are missing!")
         return None
