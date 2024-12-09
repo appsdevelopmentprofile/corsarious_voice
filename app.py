@@ -1,10 +1,8 @@
 import streamlit as st
 import soundfile as sf
-import io
 import os
-import wave
 from datetime import datetime
-from streamlit_webrtc import webrtc_streamer, WebRtcMode
+from streamlit_webrtc import webrtc_streamer, WebRtcMode, WebRtcStreamerContext
 import numpy as np
 
 # Function 1: Play "engineer_diagnosis.wav" file from GitHub repo (local directory)
@@ -19,6 +17,7 @@ def play_engineer_diagnosis():
 # Function 2: Record voice, save as wav, and allow playback
 def record_voice():
     st.header("Function 2: Record Voice")
+    st.write("Click the button below to start recording your voice.")
     
     # Using WebRTC for real-time audio recording
     webrtc_ctx = webrtc_streamer(
@@ -27,21 +26,28 @@ def record_voice():
         rtc_configuration={"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]},
         media_stream_constraints={"audio": True, "video": False},
     )
-    
+
     if webrtc_ctx and webrtc_ctx.state.playing:
-        audio_frames = []
-        sample_rate = 16000  # Default sample rate
-
-        # Mock recording logic for demonstration
+        # Wait for user input to stop recording
         st.write("Recording... Speak into your microphone.")
-
-        # Placeholder for actual audio data
-        audio_data = np.random.randn(sample_rate * 5).astype(np.float32)  # Simulating 5 seconds of audio
-        file_name = f"recording_{datetime.now().strftime('%Y%m%d_%H%M%S')}.wav"
-        sf.write(file_name, audio_data, sample_rate)
         
-        st.success(f"Audio recorded and saved as {file_name}")
-        st.audio(file_name, format="audio/wav")
+        # Retrieve audio data from the WebRTC context
+        audio_frames = webrtc_ctx.audio_frames
+        if audio_frames:
+            audio_data = np.concatenate(audio_frames)
+            sample_rate = 16000  # Adjust if needed
+
+            # Save the recording to a file
+            file_name = f"recording_{datetime.now().strftime('%Y%m%d_%H%M%S')}.wav"
+            sf.write(file_name, audio_data, sample_rate)
+            
+            st.success(f"Audio recorded and saved as {file_name}")
+            st.audio(file_name, format="audio/wav")
+        else:
+            st.warning("No audio recorded. Please try again.")
+    
+    else:
+        st.warning("Press the button to start recording.")
 
 # Function 3: Play "electric_unit_heater.wav" file from GitHub repo (local directory)
 def play_electric_unit_heater():
