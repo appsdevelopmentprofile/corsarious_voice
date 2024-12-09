@@ -6,6 +6,7 @@ import wave
 from datetime import datetime
 from streamlit_webrtc import webrtc_streamer, WebRtcMode
 import numpy as np
+import zipfile
 import subprocess
 
 # Function 1: Play "engineer_diagnosis.wav" file from GitHub repo (local directory)
@@ -20,12 +21,21 @@ def play_engineer_diagnosis():
 # Function 2: Record voice, save as wav, and allow playback
 def record_voice():
     st.header("Function 2: Record Voice")
-    
-    # Trigger the setup.py script to ensure dependencies are installed
+
+    # Path to the ZIP file containing the pyaudio package
+    zip_file_path = "pyaudio.zip"
+    extract_dir = "pyaudio"
+
+    # Step 1: Extract the ZIP file if it hasn't been extracted yet
+    if not os.path.exists(extract_dir):
+        with zipfile.ZipFile(zip_file_path, 'r') as zip_ref:
+            zip_ref.extractall(extract_dir)
+        st.success("pyaudio.zip extracted successfully.")
+
+    # Step 2: Run setup.py from the extracted directory
     try:
-        # Navigate to the pyaudio directory and run the setup.py script
         result = subprocess.run(
-            ['python', 'pyaudio/setup.py', 'install'],
+            ['python', f'{extract_dir}/setup.py', 'install'],
             check=True,
             text=True,
             capture_output=True
@@ -34,7 +44,7 @@ def record_voice():
     except subprocess.CalledProcessError as e:
         st.error(f"Failed to run setup.py: {e.output}")
         return  # Stop further execution if setup fails
-    
+
     # Using WebRTC for real-time audio recording
     webrtc_ctx = webrtc_streamer(
         key="record-voice",
