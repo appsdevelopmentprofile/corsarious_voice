@@ -7,20 +7,20 @@ import io
 from datetime import datetime
 
 # Define helper functions
-def combine_ffmpeg_parts():
-    """Combine ffmpeg split parts (if applicable)"""
-    ffmpeg_part_aa_path = "ffmpeg_part_aa"  # Path to the first part (in the same directory as app.py)
-    ffmpeg_part_ab_path = "ffmpeg_part_ab"  # Path to the second part (in the same directory as app.py)
-    combined_ffmpeg_path = "ffmpeg"  # The name for the combined ffmpeg file
+def combine_ffprobe_parts():
+    """Combine ffprobe split parts (if applicable)"""
+    ffprobe_part_aa_path = "ffprobe_part_aa"  # Path to the first part (in the same directory as app.py)
+    ffprobe_part_ab_path = "ffprobe_part_ab"  # Path to the second part (in the same directory as app.py)
+    combined_ffprobe_path = "ffprobe"  # The name for the combined ffprobe file
 
     # Ensure both parts exist before combining
-    if os.path.exists(ffmpeg_part_aa_path) and os.path.exists(ffmpeg_part_ab_path):
+    if os.path.exists(ffprobe_part_aa_path) and os.path.exists(ffprobe_part_ab_path):
         # Combine parts using 'cat' command
-        os.system(f"cat {ffmpeg_part_aa_path} {ffmpeg_part_ab_path} > {combined_ffmpeg_path}")
-        st.info(f"ffmpeg parts combined into {combined_ffmpeg_path}")
-        return combined_ffmpeg_path
+        os.system(f"cat {ffprobe_part_aa_path} {ffprobe_part_ab_path} > {combined_ffprobe_path}")
+        st.info(f"ffprobe parts combined into {combined_ffprobe_path}")
+        return combined_ffprobe_path
     else:
-        st.error("ffmpeg part files are missing!")
+        st.error("ffprobe part files are missing!")
         return None
 
 def play_questionnaire(questions):
@@ -81,10 +81,10 @@ questions = [
     "What is the label of the equipment or tag of the process?"
 ]
 
-# Load ffmpeg if needed (combine the parts if they exist)
-ffmpeg_path = combine_ffmpeg_parts()  # Path to the combined ffmpeg file
-if ffmpeg_path:
-    st.info(f"FFmpeg found at: {ffmpeg_path}")
+# Load ffprobe if needed (combine the parts if they exist)
+ffprobe_path = combine_ffprobe_parts()  # Path to the combined ffprobe file
+if ffprobe_path:
+    st.info(f"ffprobe found at: {ffprobe_path}")
 
 # Start the process
 if st.button("Start Virtual Assistant"):
