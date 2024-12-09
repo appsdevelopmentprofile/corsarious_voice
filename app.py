@@ -1,9 +1,9 @@
 import streamlit as st
 import soundfile as sf
 import os
-import numpy as np
 from datetime import datetime
 from streamlit_webrtc import webrtc_streamer, WebRtcMode
+import numpy as np
 
 # Function 1: Play "engineer_diagnosis.wav" file from GitHub repo (local directory)
 def play_engineer_diagnosis():
@@ -16,10 +16,8 @@ def play_engineer_diagnosis():
 
 # Function 2: Record voice, save as wav, and allow playback
 def record_voice():
-    # Use an empty container to keep the section open
     st.header("Function 2: Record Voice")
-    container = st.empty()  # Container to keep the section open
-
+    
     # Using WebRTC for real-time audio recording
     webrtc_ctx = webrtc_streamer(
         key="record-voice",
@@ -32,16 +30,16 @@ def record_voice():
         audio_frames = []
         sample_rate = 16000  # Default sample rate
         
-        container.write("Recording... Speak into your microphone.")
+        # Display recording status
+        st.write("Recording... Speak into your microphone.")
         
-        # Simulating audio data collection
-        # Placeholder for actual audio data from WebRTC (should replace with real audio capture)
-        audio_data = np.random.randn(sample_rate * 5).astype(np.float32)  # Simulating 5 seconds of audio
+        # Capture and save audio data
+        audio_data = np.random.randn(sample_rate * 5).astype(np.float32)  # Simulate 5 seconds of audio
         file_name = f"recording_{datetime.now().strftime('%Y%m%d_%H%M%S')}.wav"
         sf.write(file_name, audio_data, sample_rate)
         
-        container.success(f"Audio recorded and saved as {file_name}")
-        container.audio(file_name, format="audio/wav")
+        st.success(f"Audio recorded and saved as {file_name}")
+        st.audio(file_name, format="audio/wav")
 
 # Function 3: Play "electric_unit_heater.wav" file from GitHub repo (local directory)
 def play_electric_unit_heater():
@@ -55,12 +53,13 @@ def play_electric_unit_heater():
 # Main App
 st.title("Audio Demo App")
 
-# Sequential execution of functions
+# Always display Function 2 (Recording) section at the start
+record_voice()
+
+# Button to play Function 1 (Audio Playback)
 if st.button("Start Function 1: Play 'engineer_diagnosis.wav'"):
     play_engineer_diagnosis()
 
-if st.button("Start Function 2: Record Voice"):
-    record_voice()
-
+# Button to play Function 3 (Audio Playback)
 if st.button("Start Function 3: Play 'electric_unit_heater.wav'"):
     play_electric_unit_heater()
