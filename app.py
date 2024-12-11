@@ -1,36 +1,63 @@
-import streamlit as st
 import os
 import subprocess
+import streamlit as st
 from pydub import AudioSegment
 import speech_recognition as sr
 import io
-from docx import Document
-from docx.shared import Pt
-from docx.oxml.ns import qn
-from docx.oxml import OxmlElement
-import time
 
-# Set the FFMPEG_BINARY to the direct path of ffmpeg executable
-os.environ["FFMPEG_BINARY"] = "/usr/local/bin/"
+# Set the FFMPEG_BINARY and FFPROBE_BINARY to the direct paths
+os.environ["FFMPEG_BINARY"] = "/usr/local/bin/ffmpeg"
+os.environ["FFPROBE_BINARY"] = "/Users/juanrivera/Downloads/ffprobe"
 
-# Function to check if ffmpeg is accessible
-def check_ffmpeg():
+# Function to check if ffprobe is accessible
+def check_ffprobe():
     try:
-        # Run ffmpeg command to check its version
-        result = subprocess.run(['sudo', 'ffmpeg', '-version'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-
-        # Display the output in Streamlit
-        ffmpeg_version = result.stdout
-        st.write("FFmpeg version detected successfully:")
-        st.write(ffmpeg_version)
+        # Check if ffprobe is available by running a command
+        result = subprocess.run(['ffprobe', '-version'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        
+        # If ffprobe is found, return its version
+        if result.returncode == 0:
+            ffprobe_version = result.stdout
+            st.write("FFprobe version detected successfully:")
+            st.write(ffprobe_version)
+        else:
+            st.error("FFprobe not found or could not execute.")
+            return False
     except FileNotFoundError:
-        st.error("FFmpeg is not installed or not found in the specified path.")
+        st.error("FFprobe is not installed or not found in the specified path.")
+        return False
     except PermissionError:
-        st.error("Permission denied while trying to run ffmpeg with sudo.")
+        st.error("Permission denied while trying to run ffprobe.")
+        return False
     except Exception as e:
         st.error(f"An error occurred: {e}")
+        return False
+    return True
 
-# Function 1: Play "engineer_diagnosis.wav" file from GitHub repo (local directory)
+# Function to load audio (if ffprobe is available, use it)
+def load_audio_file(file_path):
+    if check_ffprobe():
+        try:
+            # Proceed to load the audio file
+            audio = AudioSegment.from_file(file_path)
+            st.success("Audio file loaded successfully!")
+            return audio
+        except Exception as e:
+            st.error(f"Error loading audio file: {e}")
+    else:
+        st.warning("Skipping ffprobe-related operations. Proceeding without ffprobe.")
+        # Fallback logic if ffprobe is not available
+        try:
+            # Attempt to load audio without ffprobe (using basic pydub methods)
+            audio = AudioSegment.from_file(file_path)
+            st.success("Audio file loaded successfully (using fallback method)!")
+            return audio
+        except Exception as e:
+            st.error(f"Error loading audio file: {e}")
+    
+    return None
+
+# Function 1: Play 'engineer_diagnosis.wav'
 def play_engineer_diagnosis():
     st.header("Function 1: Play 'engineer_diagnosis.wav'")
     file_path = "engineer_diagnosis.wav"
@@ -63,10 +90,10 @@ def record_voice():
         audio.export(mp3_file_path, format="mp3")
         st.audio(mp3_file_path, format="audio/mp3")
 
-# Function 3: Play "engineer_equipment.wav" file from GitHub repo (local directory) and recognize speech
+# Function 3: Play 'engineer_equipment.wav' and recognize speech
 def recognize_speech_from_wav(file_path):
     recognizer = sr.Recognizer()
-    
+
     # Export the audio as raw audio data in bytes (for speech_recognition to process)
     audio_data = io.BytesIO()
     audio = AudioSegment.from_wav(file_path)
@@ -98,56 +125,7 @@ def play_electric_unit_heater():
         st.write(recognized_text)
 
     else:
-        st.error("File 'engineer_equipment.wav' not found!")
-
-# Function 5: Create checklist document and display progress
-def create_checklist_doc(text):
-    # Create a new Document
-    doc = Document()
-
-    # Title of the document
-    doc.add_heading('Field Engineer Questionnaire', 0)
-
-    # Split the text from the MP3 file into checklist items (assumes text is already formatted appropriately)
-    lines = text.split(".")  # Basic split by periods. Adjust if needed for your specific use case.
-
-    # Create a checklist based on the extracted text
-    for line in lines:
-        line = line.strip()
-        if line:
-            p = doc.add_paragraph(style='List Checkmark')  # Adding a checkbox-style paragraph
-            p.add_run(f'☐ {line}')  # Use checkbox character for the checklist item
-
-    # Add a comment section at the bottom
-    doc.add_paragraph("\n")
-    doc.add_heading('Comments', level=2)
-    doc.add_paragraph("Please add any additional comments here:")
-
-    # Save the document
-    doc.save("field_engineer_checklist.docx")
-    st.success("Document 'field_engineer_checklist.docx' created successfully.")
-
-# Function to simulate the progress of Phase 5 (document creation)
-def phase_5_progress():
-    st.header("Phase 5: Generate Document")
-    st.subheader("Creating the checklist from speech text...")
-    
-    # Simulate progress
-    progress_bar = st.progress(0)
-    
-    # Generate the text for document creation (using speech recognition)
-    text = recognize_speech_from_wav("engineer_equipment.wav")
-    
-    # Simulate document generation process
-    for i in range(100):
-        time.sleep(0.05)
-        progress_bar.progress(i + 1)
-    
-    # Create the checklist document with the recognized text
-    create_checklist_doc(text)
-    
-    st.write("Document generation complete. Download it below:")
-    st.download_button("Download field_engineer_checklist.docx", "field_engineer_checklist.docx")
+        st.error("File 'electric_unit_heater.wav' not found!")
 
 # Main App
 st.title("Audio Demo App")
@@ -159,12 +137,9 @@ if st.button("Start Function 1: Play 'engineer_diagnosis.wav'"):
 if st.button("Start Function 2: Record Voice"):
     record_voice()
 
-if st.button("Start Function 3: Play 'engineer_equipment.wav' and Recognize Speech"):
+if st.button("Start Function 3: Play 'engineer_equipment.wav'"):
     play_electric_unit_heater()
 
-if st.button("Start Function 5: Generate Document from 'engineer_equipment.wav'"):
-    phase_5_progress()
-
-# Button to check FFmpeg version
+# Check and provide FFmpeg info
 if st.button("Check FFmpeg Version"):
-    check_ffmpeg()
+    check_ffprobe()
