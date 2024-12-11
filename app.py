@@ -1,16 +1,13 @@
 import streamlit as st
 import os
 import subprocess
-import io
 from pydub import AudioSegment
 import speech_recognition as sr
+import io
 
 # Set the FFMPEG_BINARY to the direct path of ffmpeg executable
-os.environ["FFMPEG_BINARY"] = "/usr/local/bin/"
-
-# Set the path to the ffprobe binary
-os.environ["FFPROBE_BINARY"] = "/usr/local/bin/"
-
+os.environ["FFMPEG_BINARY"] = "/usr/local/bin/ffmpeg"
+os.environ["FFPROBE_BINARY"] = "/usr/local/bin/ffprobe"
 
 # Function to check if ffmpeg is accessible
 def check_ffmpeg():
@@ -30,20 +27,20 @@ def check_ffmpeg():
         st.error(f"An error occurred: {e}")
 
 # Streamlit app title
-st.title("FFmpeg Integration Example")
+st.title("FFmpeg and Speech-to-Text Integration Example")
 
 # Button to check FFmpeg version
 if st.button("Check FFmpeg Version"):
     check_ffmpeg()
 
-# Function 1: Play "engineer_diagnosis.wav" file from GitHub repo (local directory)
-def play_engineer_diagnosis():
-    st.header("Function 1: Play 'engineer_diagnosis.wav'")
-    file_path = "engineer_diagnosis.wav"
+# Function 1: Play "electric_unit_heater.wav" file from GitHub repo (local directory)
+def play_electric_unit_heater():
+    st.header("Function 1: Play 'electric_unit_heater.wav'")
+    file_path = "electric_unit_heater.wav"
     if os.path.exists(file_path):
         st.audio(file_path, format="audio/wav")
     else:
-        st.error("File 'engineer_diagnosis.wav' not found!")
+        st.error("File 'electric_unit_heater.wav' not found!")
 
 # Function 2: Record voice, save as wav, and allow playback
 def record_voice():
@@ -69,54 +66,44 @@ def record_voice():
         audio.export(mp3_file_path, format="mp3")
         st.audio(mp3_file_path, format="audio/mp3")
 
-# Function 3: Play "electric_unit_heater.wav" file from GitHub repo (local directory)
-def play_electric_unit_heater():
-    st.header("Function 3: Play 'electric_unit_heater.wav'")
-    file_path = "electric_unit_heater.wav"
-    if os.path.exists(file_path):
-        st.audio(file_path, format="audio/wav")
-    else:
-        st.error("File 'electric_unit_heater.wav' not found!")
+# Function 3: Convert speech from wav file to text using Google Speech Recognition
+def recognize_speech_from_wav(wav_file):
+    recognizer = sr.Recognizer()
 
-# Function 4: Speech-to-Text from "engineer_equipment.mp3"
-def transcribe_engineer_equipment():
-    st.header("Function 4: Transcribe 'engineer_equipment.mp3'")
-    file_path = "engineer_equipment.mp3"
-    if os.path.exists(file_path):
-        st.success(f"Processing file: {file_path}")
-        
-        # Convert MP3 to WAV for compatibility
-        audio = AudioSegment.from_file(file_path)
-        wav_file_path = "engineer_equipment_converted.wav"
-        audio.export(wav_file_path, format="wav")
-        
-        # Perform speech recognition
-        recognizer = sr.Recognizer()
-        with sr.AudioFile(wav_file_path) as source:
-            audio_recorded = recognizer.record(source)
-            try:
-                text = recognizer.recognize_google(audio_recorded)
-                st.subheader("Recognized Text:")
-                st.write(text)
-            except sr.UnknownValueError:
-                st.error("Google Speech Recognition could not understand the audio.")
-            except sr.RequestError as e:
-                st.error(f"Could not request results from Google Speech Recognition service; {e}")
+    # Load the .wav file
+    with sr.AudioFile(wav_file) as source:
+        audio = recognizer.record(source)
+        try:
+            # Use Google Web Speech API to recognize the speech
+            text = recognizer.recognize_google(audio)
+            return text.lower()
+        except sr.UnknownValueError:
+            return "Speech not recognized"
+        except sr.RequestError as e:
+            return f"Error with the request: {e}"
+
+# Function 4: Process the "electric_unit_heater.wav" file
+def process_electric_unit_heater():
+    st.header("Function 4: Recognize Speech from 'electric_unit_heater.wav'")
+
+    wav_file = "electric_unit_heater.wav"
+    
+    if os.path.exists(wav_file):
+        # Convert the speech in the .wav file to text
+        recognized_text = recognize_speech_from_wav(wav_file)
+        st.write(f"Recognized Text: {recognized_text}")
     else:
-        st.error("File 'engineer_equipment.mp3' not found!")
+        st.error(f"File '{wav_file}' not found!")
 
 # Main App
-st.title("Audio Demo App")
+st.title("Audio Demo App with Speech-to-Text")
 
 # Sequential execution of functions
-if st.button("Start Function 1: Play 'engineer_diagnosis.wav'"):
-    play_engineer_diagnosis()
+if st.button("Start Function 1: Play 'electric_unit_heater.wav'"):
+    play_electric_unit_heater()
 
 if st.button("Start Function 2: Record Voice"):
     record_voice()
 
-if st.button("Start Function 3: Play 'electric_unit_heater.wav'"):
-    play_electric_unit_heater()
-
-if st.button("Start Function 4: Transcribe 'engineer_equipment.mp3'"):
-    transcribe_engineer_equipment()
+if st.button("Start Function 3: Recognize Speech from 'electric_unit_heater.wav'"):
+    process_electric_unit_heater()
