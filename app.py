@@ -40,28 +40,76 @@ def play_engineer_diagnosis():
         st.error("File 'engineer_diagnosis.wav' not found!")
 
 # Function 2: Record voice, save as wav, and allow playback
-def record_voice():
-    st.header("Function 2: Record Voice")
+import streamlit as st
+import sounddevice as sd
+import numpy as np
+import os
+from scipy.io.wavfile import write
+from pydub import AudioSegment
 
-    # Upload an audio file (only wav or mp3)
-    uploaded_file = st.file_uploader("Choose a file", type=["wav", "mp3"])
-        
-    if uploaded_file is not None:
-        # Convert uploaded audio to AudioSegment
-        audio = AudioSegment.from_file(uploaded_file)
-            
-        # Save the uploaded audio as WAV
-        wav_file_path = "uploaded_audio.wav"
-        audio.export(wav_file_path, format="wav")
-            
-        # Display success message and play the audio
-        st.success(f"Audio uploaded and saved as {wav_file_path}!")
-        st.audio(wav_file_path, format="audio/wav")
-            
-        # Optionally save as MP3 as well
-        mp3_file_path = "uploaded_audio.mp3"
-        audio.export(mp3_file_path, format="mp3")
+# Globals
+recording = None
+recording_state = False
+
+# Set audio properties
+SAMPLE_RATE = 44100  # Sample rate for recording
+CHANNELS = 1         # Mono audio
+
+# Function to start recording
+def start_recording():
+    global recording, recording_state
+    st.session_state["recording"] = []
+    st.session_state["recording_state"] = True
+
+    # Callback to capture audio chunks
+    def audio_callback(indata, frames, time, status):
+        st.session_state["recording"].append(indata.copy())
+
+    # Start audio recording
+    st.session_state["stream"] = sd.InputStream(
+        samplerate=SAMPLE_RATE, channels=CHANNELS, callback=audio_callback
+    )
+    st.session_state["stream"].start()
+
+    st.success("Recording started! Click 'Stop Recording' to finish.")
+
+# Function to stop recording and save as MP3
+def stop_recording():
+    if "stream" in st.session_state and st.session_state["stream"].active:
+        st.session_state["stream"].stop()
+        st.session_state["stream"].close()
+        st.session_state["recording_state"] = False
+
+        # Combine audio chunks
+        audio_data = np.concatenate(st.session_state["recording"])
+        wav_file_path = "recorded_audio.wav"
+        write(wav_file_path, SAMPLE_RATE, audio_data)
+
+        # Convert to MP3
+        mp3_file_path = "recorded_audio.mp3"
+        audio_segment = AudioSegment.from_wav(wav_file_path)
+        audio_segment.export(mp3_file_path, format="mp3")
+
+        st.success(f"Recording saved as {mp3_file_path}!")
         st.audio(mp3_file_path, format="audio/mp3")
+
+# Streamlit App
+st.title("Audio Recorder Example")
+
+# Button to start recording
+if st.button("Start Recording"):
+    if "recording_state" in st.session_state and st.session_state["recording_state"]:
+        st.warning("Recording is already in progress!")
+    else:
+        start_recording()
+
+# Button to stop recording
+if st.button("Stop Recording"):
+    if "recording_state" in st.session_state and st.session_state["recording_state"]:
+        stop_recording()
+    else:
+        st.warning("No recording in progress to stop.")
+
 
 # Function 3: Play "electric_unit_heater.wav" file from GitHub repo (local directory)
 def play_electric_unit_heater():
