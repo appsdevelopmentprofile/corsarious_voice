@@ -95,6 +95,65 @@ def process_electric_unit_heater():
     else:
         st.error(f"File '{wav_file}' not found!")
 
+
+# Function 5: Create a checklist document after speech recognition
+def create_checklist_doc(text):
+    # Create a new Document
+    doc = Document()
+
+    # Title of the document
+    doc.add_heading('Field Engineer Questionnaire', 0)
+
+    # Split the text from the MP3 file into checklist items (assumes text is already formatted appropriately)
+    lines = text.split(".")  # Basic split by periods. Adjust if needed for your specific use case.
+
+    # Create a checklist based on the extracted text
+    for line in lines:
+        line = line.strip()
+        if line:
+            p = doc.add_paragraph(style='List Checkmark')  # Adding a checkbox-style paragraph
+            p.add_run(f'☐ {line}')  # Use checkbox character for the checklist item
+
+    # Add a comment section at the bottom
+    doc.add_paragraph("\n")
+    doc.add_heading('Comments', level=2)
+    doc.add_paragraph("Please add any additional comments here:")
+
+    # Save the document
+    doc.save("field_engineer_checklist.docx")
+    st.success("Document 'field_engineer_checklist.docx' created successfully.")
+
+    # Return the document path
+    return "field_engineer_checklist.docx"
+
+# Function to simulate phase 5 with a progress bar
+def phase_5_generate_checklist(file_path):
+    st.header("Function 5: Generate Checklist from Audio and Display Progress")
+    
+    # Extract text from audio
+    recognized_text = recognize_speech_from_wav(file_path)
+
+    # Show a progress bar
+    progress_bar = st.progress(0)
+    
+    # Simulate long-running process of creating the checklist document
+    for i in range(1, 101):
+        progress_bar.progress(i)
+        time.sleep(0.05)  # Simulate work being done
+    
+    # Once done, generate the document
+    doc_path = create_checklist_doc(recognized_text)
+    
+    # Provide download link for the document
+    with open(doc_path, "rb") as doc_file:
+        st.download_button(
+            label="Download Checklist Document",
+            data=doc_file,
+            file_name="field_engineer_checklist.docx",
+            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        )
+
+
 # Main App
 st.title("Audio Demo App with Speech-to-Text")
 
@@ -107,3 +166,9 @@ if st.button("Start Function 2: Record Voice"):
 
 if st.button("Start Function 3: Recognize Speech from 'electric_unit_heater.wav'"):
     process_electric_unit_heater()
+    if st.button("Start Function 5: Generate Checklist from Audio"):
+    # Trigger phase 5 with a sample file
+    file_path = "engineer_equipment.wav"  # Change to the actual file path
+    phase_5_generate_checklist(file_path)
+
+
