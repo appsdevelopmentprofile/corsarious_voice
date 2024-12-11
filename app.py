@@ -106,7 +106,8 @@ if st.button("Start Function 1: Play 'engineer_diagnosis.wav'"):
 if st.button("Start Function 2: Record Voice"):
     record_voice()
 
-if st.button("Start Function 3: Play "engineer_equipment.wav"):
+# Corrected the button syntax here by removing the inner quotes
+if st.button('Start Function 3: Play "engineer_equipment.wav"'):
     play_electric_unit_heater()
 
 # Button to check FFmpeg version
