@@ -134,7 +134,7 @@ def display_docx_as_image(buffer):
         st.error(f"An error occurred while converting or displaying the document: {e}")
 
 # Main App
-st.title("Audio Processing App with Stages")
+st.title("Virtual Verbal Assisstant")
 
 if st.button("Stage 1: Play 'engineer_diagnosis.wav'"):
     play_engineer_diagnosis()
