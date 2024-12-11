@@ -5,6 +5,10 @@ from pydub import AudioSegment
 import speech_recognition as sr
 from docx import Document
 from io import BytesIO
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+from pdf2image import convert_from_path
+import tempfile
 
 # Set the FFMPEG_BINARY to the direct path of ffmpeg executable
 os.environ["FFMPEG_BINARY"] = "/usr/local/bin/ffmpeg"
@@ -100,21 +104,34 @@ def create_checklist_document(sentences):
         mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     )
 
-    # Call the display function here after the document is created
-    display_docx_content(buffer)
+    # Call the function to display the first page as a visual preview
+    display_docx_as_image(buffer)
 
-# Function to read and display the content of a .docx file
-def display_docx(file_name):
-    document = Document(file_name)
-    st.subheader("Document Content:")
+# Convert .docx to PDF and then PDF to image (first page)
+def convert_docx_to_pdf(buffer):
+    temp_pdf_path = tempfile.mktemp(suffix=".pdf")
+    document = Document(buffer)
+    c = canvas.Canvas(temp_pdf_path, pagesize=letter)
+    c.setFont("Helvetica", 10)
     for paragraph in document.paragraphs:
-        st.write(paragraph.text)
+        c.drawString(100, 750, paragraph.text)
+        c.showPage()
+    c.save()
+    return temp_pdf_path
 
-st.title("Visualize DOCX File")
-uploaded_file = st.file_uploader("Upload a DOCX file", type=["docx"])
+def display_docx_as_image(buffer):
+    try:
+        # Convert the .docx to PDF
+        temp_pdf_path = convert_docx_to_pdf(buffer)
 
-if uploaded_file:
-    display_docx(uploaded_file)
+        # Convert the first page of the PDF to an image
+        images = convert_from_path(temp_pdf_path, first_page=1, last_page=1)
+
+        # Display the first page image in Streamlit
+        st.image(images[0], caption="First Page of the Checklist Document", use_column_width=True)
+
+    except Exception as e:
+        st.error(f"An error occurred while converting or displaying the document: {e}")
 
 # Main App
 st.title("Audio Processing App with Stages")
