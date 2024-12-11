@@ -1,16 +1,22 @@
 import streamlit as st
 import os
+import subprocess
 from pydub.utils import which
 from pydub import AudioSegment
 
 # Check if ffmpeg is located
 ffmpeg_path = which("ffmpeg")
 
-# Display result in Streamlit
-if ffmpeg_path:
-    st.success(f"FFmpeg is successfully located at: {ffmpeg_path}")
-else:
-    st.error("FFmpeg is not installed or not found in the system path.")
+# Set the ffmpeg path manually
+os.environ["PATH"] = "/usr/local/bin:" + os.environ["PATH"]
+
+# Verify ffmpeg is accessible
+try:
+    result = subprocess.run(['ffmpeg', '-version'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    print(result.stdout.decode())
+except FileNotFoundError:
+    print("FFmpeg is not installed or not found in the system path.")
+
 
 # Function 1: Play "engineer_diagnosis.wav" file from GitHub repo (local directory)
 def play_engineer_diagnosis():
