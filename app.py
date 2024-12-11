@@ -103,7 +103,7 @@ def show_progress_bar():
     progress_bar = st.progress(0)
     for i in range(1, 101):
         progress_bar.progress(i)
-        st.sleep(0.1)  # Simulating a process with a delay
+        time.sleep(0.1)  # Simulating a process with a delay
     st.success("Task Completed!")
 
 # Function 5: Generate a checklist document after phases 1-4
@@ -114,7 +114,7 @@ def generate_checklist_doc():
     progress_bar = st.progress(0)
     for i in range(1, 101):
         progress_bar.progress(i)
-        st.sleep(0.05)  # Simulating document generation with a small delay
+        time.sleep(0.05)  # Simulating document generation with a small delay
     
     # Create the checklist document
     doc = Document()
