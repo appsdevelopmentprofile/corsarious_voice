@@ -104,22 +104,17 @@ def create_checklist_document(sentences):
     display_docx_content(buffer)
 
 # Function to read and display the content of a .docx file
-def display_docx_content(buffer):
-    try:
-        # Load the .docx file from the buffer
-        document = Document(buffer)
+def display_docx(file_name):
+    document = Document(file_name)
+    st.subheader("Document Content:")
+    for paragraph in document.paragraphs:
+        st.write(paragraph.text)
 
-        # Display the content of the .docx file (first few paragraphs as preview)
-        st.subheader("Document Preview:")
-        content = ""
-        for paragraph in document.paragraphs[:5]:  # Limiting to the first 5 paragraphs for preview
-            content += paragraph.text + "\n"
+st.title("Visualize DOCX File")
+uploaded_file = st.file_uploader("Upload a DOCX file", type=["docx"])
 
-        # Display the preview content in the app
-        st.text_area("Document Content Preview", content, height=300)
-
-    except Exception as e:
-        st.error(f"An error occurred while reading the document: {e}")
+if uploaded_file:
+    display_docx(uploaded_file)
 
 # Main App
 st.title("Audio Processing App with Stages")
