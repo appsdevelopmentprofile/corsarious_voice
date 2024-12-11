@@ -68,14 +68,14 @@ def process_speech_to_text():
     return []
 
 # Function 4: Create a checklist from recognized speech
-# Function 4: Create a checklist from recognized speech
+# Function to create the checklist document
 def create_checklist_document(sentences):
     st.header("Stage 4: Create Checklist from Recognized Speech")
     if not sentences:
         st.error("No sentences provided to generate the checklist.")
         return
 
-    # Create document
+    # Create the checklist document
     document = Document()
     document.add_heading('Field Engineer Checklist', level=1)
 
@@ -90,11 +90,12 @@ def create_checklist_document(sentences):
             row_cells[0].text = sentence.strip()
             row_cells[1].text = '☐ YES ☐ NO'
 
+    # Save document to a BytesIO buffer
     buffer = BytesIO()
     document.save(buffer)
     buffer.seek(0)
 
-    # Extract first 5 paragraphs as a preview
+    # Extract preview for display
     st.write("Preview of Checklist Document (First Page):")
     buffer.seek(0)  # Reset buffer to the beginning
     preview_document = Document(buffer)
@@ -108,6 +109,26 @@ def create_checklist_document(sentences):
         file_name="field_engineer_checklist.docx",
         mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     )
+
+# Streamlit app
+st.title("Checklist Document Generator")
+
+# Input for sentences
+st.subheader("Enter Sentences for Checklist")
+sentences_input = st.text_area(
+    "Provide sentences (one per line):",
+    height=200,
+    placeholder="Example:\nEnsure equipment is calibrated\nVerify safety protocols"
+)
+
+# Button to create checklist document
+if st.button("Generate Checklist"):
+    # Convert user input into a list of sentences
+    sentences = [line.strip() for line in sentences_input.split("\n") if line.strip()]
+    create_checklist_document(sentences)
+
+
+
 # Main App
 st.title("Audio Processing App with Stages")
 
