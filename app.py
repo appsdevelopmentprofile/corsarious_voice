@@ -4,7 +4,7 @@ import io
 import os
 import wave
 from datetime import datetime
-from st_audiorecorder import st_audiorecorder
+from streamlit_audiorecorder import st_audiorecorder  # Correct import
 from pydub import AudioSegment
 
 # Function 1: Play "engineer_diagnosis.wav" file from GitHub repo (local directory)
