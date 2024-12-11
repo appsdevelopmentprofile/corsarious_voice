@@ -68,6 +68,7 @@ def process_speech_to_text():
     return []
 
 # Function 4: Create a checklist from recognized speech
+# Function 4: Create a checklist from recognized speech
 def create_checklist_document(sentences):
     st.header("Stage 4: Create Checklist from Recognized Speech")
     if not sentences:
@@ -93,19 +94,20 @@ def create_checklist_document(sentences):
     document.save(buffer)
     buffer.seek(0)
 
-    # Display first page content in Streamlit
+    # Extract first 5 paragraphs as a preview
     st.write("Preview of Checklist Document (First Page):")
-    for para in document.paragraphs[:5]:  # Display first 5 paragraphs as an approximation of the first page
+    buffer.seek(0)  # Reset buffer to the beginning
+    preview_document = Document(buffer)
+    for para in preview_document.paragraphs[:5]:  # Display first 5 paragraphs as an approximation of the first page
         st.write(para.text)
 
-    # Download button
+    # Display the download button
     st.download_button(
         label="Download Checklist Document",
         data=buffer,
         file_name="field_engineer_checklist.docx",
         mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     )
-
 # Main App
 st.title("Audio Processing App with Stages")
 
