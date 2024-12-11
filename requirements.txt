@@ -6,3 +6,5 @@ ffmpeg-python==0.2.0
 docx
 python-docx==0.8.11
 Pillow
+reportlab
+pdf2image
