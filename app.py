@@ -6,6 +6,9 @@ import numpy as np
 from scipy.io.wavfile import write
 from pydub import AudioSegment
 import sys
+import io
+import speech_recognition as sr
+
 
 # Add the paths to portaudio and sounddevice
 sys.path.append('/opt/anaconda3/envs/base/lib/python3.11/site-packages')
@@ -94,6 +97,61 @@ def play_electric_unit_heater():
         st.audio(file_path, format="audio/wav")
     else:
         st.error("File 'electric_unit_heater.wav' not found!")
+        
+# Fucntion 4: Get the text from the recording the engineer made
+
+
+def extract_text_from_audio(file_path):
+    """Extract text from the provided audio file using Google Speech Recognition."""
+    # Initialize recognizer
+    recognizer = sr.Recognizer()
+
+    try:
+        # Convert the audio file to a compatible format
+        audio = AudioSegment.from_file(file_path)
+        audio_data = io.BytesIO()
+        audio.export(audio_data, format="wav")
+        audio_data.seek(0)
+
+        # Recognize speech from the audio data
+        with sr.AudioFile(audio_data) as source:
+            audio_recorded = recognizer.record(source)
+            try:
+                text = recognizer.recognize_google(audio_recorded)
+                return text.lower()  # Return recognized text in lowercase
+            except sr.UnknownValueError:
+                return "Unrecognized: Google Speech could not understand the audio."
+            except sr.RequestError as e:
+                return f"Error: Could not request results from Google Speech Recognition service. {e}"
+
+    except Exception as e:
+        return f"Error processing the audio file: {e}"
+
+def play_and_extract_electric_unit_heater():
+    """Streamlit function to play and extract text from 'electric_unit_heater.wav'."""
+    st.header("Function 4: Play and Extract Text from 'electric_unit_heater.wav'")
+    
+    file_path = "electric_unit_heater.wav"  # Ensure the file is in the same directory or provide a relative path
+    
+    if os.path.exists(file_path):
+        # Play the audio
+        st.audio(file_path, format="audio/wav")
+        
+        # Extract text
+        with st.spinner("Extracting text from the audio..."):
+            extracted_text = extract_text_from_audio(file_path)
+        
+        # Display extracted text
+        st.subheader("Extracted Text:")
+        st.write(extracted_text)
+    else:
+        st.error("File 'electric_unit_heater.wav' not found!")
+
+# Add the function to your Streamlit app
+if __name__ == "__main__":
+    play_and_extract_electric_unit_heater()
+
+
 
 # Streamlit App
 st.title("Audio Demo App")
