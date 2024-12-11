@@ -166,7 +166,7 @@ if st.button("Start Function 2: Record Voice"):
 
 if st.button("Start Function 3: Recognize Speech from 'electric_unit_heater.wav'"):
     process_electric_unit_heater()
-    if st.button("Start Function 5: Generate Checklist from Audio"):
+if st.button("Start Function 5: Generate Checklist from Audio"):
     # Trigger phase 5 with a sample file
     file_path = "engineer_equipment.wav"  # Change to the actual file path
     phase_5_generate_checklist(file_path)
