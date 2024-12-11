@@ -115,11 +115,8 @@ if st.button("Stage 1: Play 'engineer_diagnosis.wav'"):
 if st.button("Stage 2: Record Voice"):
     record_voice()
 
+# Trigger Stage 4 automatically after Stage 3 (if text is recognized)
 if st.button("Stage 3: Recognize Speech from 'electric_unit_heater.wav'"):
     sentences = process_speech_to_text()
-
-if st.button("Stage 4: Create Checklist Document"):
-    if 'sentences' in locals() and sentences:
-        create_checklist_document(sentences)
-    else:
-        st.error("Please complete Stage 3 before proceeding to Stage 4.")
+    if sentences:
+        create_checklist_document(sentences)  # Automatically trigger Stage 4 once text is recognized
