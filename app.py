@@ -84,9 +84,9 @@ def recognize_speech_from_wav(wav_file):
 
 # Function 4: Process the "electric_unit_heater.wav" file
 def process_electric_unit_heater():
-    st.header("Function 4: Recognize Speech from 'engineer_equipment.wav'")
+    st.header("Function 4: Recognize Speech from 'electric_unit_heater.wav'")
 
-    wav_file = "engineer_equipment.wav"
+    wav_file = "electric_unit_heater.wav"
    
     if os.path.exists(wav_file):
         # Convert the speech in the .wav file to text
@@ -105,5 +105,5 @@ if st.button("Start Function 1: Play 'electric_unit_heater.wav'"):
 if st.button("Start Function 2: Record Voice"):
     record_voice()
 
-if st.button("Start Function 3: Recognize Speech from 'engineer_equipment.wav'"):
+if st.button("Start Function 3: Recognize Speech from 'electric_unit_heater.wav'"):
     process_electric_unit_heater()
