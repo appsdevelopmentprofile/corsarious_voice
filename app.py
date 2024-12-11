@@ -5,6 +5,17 @@ import sounddevice as sd
 import numpy as np
 from scipy.io.wavfile import write
 from pydub import AudioSegment
+import sys
+
+# Add the paths to portaudio and sounddevice
+sys.path.append('/opt/anaconda3/envs/base/lib/python3.11/site-packages')
+sys.path.append('/opt/anaconda3/lib/python3.11/site-packages')
+
+# Now import sounddevice or portaudio
+
+# Test if the sounddevice package works
+print(sd.query_devices())
+
 
 # Set the FFMPEG_BINARY to the direct path of ffmpeg executable
 os.environ["FFMPEG_BINARY"] = "/usr/local/bin/"
