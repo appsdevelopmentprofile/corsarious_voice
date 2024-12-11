@@ -1,12 +1,12 @@
 import streamlit as st
 import os
 import subprocess
-from pydub import AudioSegment
 import io
+from pydub import AudioSegment
 import speech_recognition as sr
 
 # Set the FFMPEG_BINARY to the direct path of ffmpeg executable
-os.environ["FFMPEG_BINARY"] = "/usr/local/bin/"
+os.environ["FFMPEG_BINARY"] = "/usr/local/bin/ffmpeg"
 
 # Function to check if ffmpeg is accessible
 def check_ffmpeg():
@@ -74,50 +74,32 @@ def play_electric_unit_heater():
     else:
         st.error("File 'electric_unit_heater.wav' not found!")
 
-# Function 4: Play "electric_unit_heater.wav" and extract text
-def play_and_extract_electric_unit_heater():
-    st.header("Function 4: Play and Extract Text from 'electric_unit_heater.wav'")
-    file_path = "electric_unit_heater.wav"
-    
+# Function 4: Speech-to-Text from "engineer_equipment.mp3"
+def transcribe_engineer_equipment():
+    st.header("Function 4: Transcribe 'engineer_equipment.mp3'")
+    file_path = "engineer_equipment.mp3"
     if os.path.exists(file_path):
-        # Play the audio
-        st.audio(file_path, format="audio/wav")
+        st.success(f"Processing file: {file_path}")
         
-        # Extract text
-        with st.spinner("Extracting text from the audio..."):
-            extracted_text = extract_text_from_audio(file_path)
-        
-        # Display extracted text
-        st.subheader("Extracted Text:")
-        st.write(extracted_text)
-    else:
-        st.error("File 'electric_unit_heater.wav' not found!")
-
-def extract_text_from_audio(file_path):
-    """Extract text from the provided audio file using Google Speech Recognition."""
-    # Initialize recognizer
-    recognizer = sr.Recognizer()
-
-    try:
-        # Convert the audio file to a compatible format
+        # Convert MP3 to WAV for compatibility
         audio = AudioSegment.from_file(file_path)
-        audio_data = io.BytesIO()
-        audio.export(audio_data, format="wav")
-        audio_data.seek(0)
-
-        # Recognize speech from the audio data
-        with sr.AudioFile(audio_data) as source:
+        wav_file_path = "engineer_equipment_converted.wav"
+        audio.export(wav_file_path, format="wav")
+        
+        # Perform speech recognition
+        recognizer = sr.Recognizer()
+        with sr.AudioFile(wav_file_path) as source:
             audio_recorded = recognizer.record(source)
             try:
                 text = recognizer.recognize_google(audio_recorded)
-                return text.lower()  # Return recognized text in lowercase
+                st.subheader("Recognized Text:")
+                st.write(text)
             except sr.UnknownValueError:
-                return "Unrecognized: Google Speech could not understand the audio."
+                st.error("Google Speech Recognition could not understand the audio.")
             except sr.RequestError as e:
-                return f"Error: Could not request results from Google Speech Recognition service. {e}"
-
-    except Exception as e:
-        return f"Error processing the audio file: {e}"
+                st.error(f"Could not request results from Google Speech Recognition service; {e}")
+    else:
+        st.error("File 'engineer_equipment.mp3' not found!")
 
 # Main App
 st.title("Audio Demo App")
@@ -132,5 +114,5 @@ if st.button("Start Function 2: Record Voice"):
 if st.button("Start Function 3: Play 'electric_unit_heater.wav'"):
     play_electric_unit_heater()
 
-if st.button("Start Function 4: Play and Extract Text from 'electric_unit_heater.wav'"):
-    play_and_extract_electric_unit_heater()
+if st.button("Start Function 4: Transcribe 'engineer_equipment.mp3'"):
+    transcribe_engineer_equipment()
