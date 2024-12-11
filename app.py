@@ -109,40 +109,77 @@ def show_progress_bar():
     st.success("Task Completed!")
 
 # Function 5: Generate a checklist document after phases 1-4
-def generate_checklist_doc():
-    st.header("Function 5: Generate Checklist Document")
+import speech_recognition as sr
+from docx import Document
+from pydub import AudioSegment
+import io
 
-    # Show progress bar while the document is being generated
-    progress_bar = st.progress(0)
-    for i in range(1, 101):
-        progress_bar.progress(i)
-        time.sleep(0.05)  # Simulating document generation with a small delay
+# Function to recognize speech from the WAV file
+def recognize_speech_from_wav(file_path):
+    recognizer = sr.Recognizer()
     
-    # Create the checklist document
+    # Export the audio as raw audio data in bytes (for speech_recognition to process)
+    audio_data = io.BytesIO()
+    audio = AudioSegment.from_wav(file_path)
+    audio.export(audio_data, format="wav")
+    audio_data.seek(0)  # Go to the beginning of the audio data
+
+    # Recognize speech from the audio data
+    with sr.AudioFile(audio_data) as source:
+        audio_recorded = recognizer.record(source)
+        try:
+            text = recognizer.recognize_google(audio_recorded)
+            return text.lower()  # Return the recognized text in lowercase
+        except sr.UnknownValueError:
+            return "unrecognized"
+        except sr.RequestError as e:
+            return f"error: {e}"
+
+# Function to create a checklist document from recognized speech
+def create_checklist_doc_from_speech(text):
+    # Create a new Document
     doc = Document()
+
+    # Title of the document
     doc.add_heading('Field Engineer Questionnaire', 0)
 
-    # Sample checklist content for the document (this should be dynamic based on actual data)
-    checklist_items = [
-        "Check equipment condition",
-        "Verify power connections",
-        "Ensure safety equipment is in place"
-    ]
+    # Add a table with 2 columns
+    table = doc.add_table(rows=1, cols=2)
 
-    # Add items to the checklist
-    for item in checklist_items:
-        p = doc.add_paragraph(style='List Checkmark')  # Adding a checkbox-style paragraph
-        p.add_run(f'☐ {item}')  # Use checkbox character for the checklist item
+    # Set the table header (first row)
+    hdr_cells = table.rows[0].cells
+    hdr_cells[0].text = 'Question'
+    hdr_cells[1].text = 'Answer (YES/NO)'
 
-    # Add a comment section at the bottom
-    doc.add_paragraph("\n")
-    doc.add_heading('Comments', level=2)
-    doc.add_paragraph("Please add any additional comments here:")
+    # Split the recognized text into checklist items (basic split by periods for demo)
+    lines = text.split(".")  # Split by periods for simplicity, customize as needed
+
+    # Add questions and the YES/NO options in the table
+    for line in lines:
+        line = line.strip()
+        if line:
+            row_cells = table.add_row().cells
+            row_cells[0].text = line  # Add the question
+            row_cells[1].text = '☐ YES ☐ NO'  # Placeholder for the "YES/NO" selection
 
     # Save the document
-    doc.save("field_engineer_checklist.docx")
-    st.success("Document 'field_engineer_checklist.docx' created successfully!")
-    st.download_button("Download Checklist", "field_engineer_checklist.docx")
+    doc.save('field_engineer_checklist_from_speech.docx')
+    print("Checklist document created successfully based on speech recognition.")
+
+# Main function to process the WAV file and create the document
+def process_audio_and_create_doc(file_path):
+    print("Recognizing speech from audio file...")
+    recognized_text = recognize_speech_from_wav(file_path)
+
+    print("Creating checklist document...")
+    create_checklist_doc_from_speech(recognized_text)
+
+# Path to the WAV file (engineer_equipment.wav)
+file_path = "engineer_equipment.wav"
+
+# Run the process
+process_audio_and_create_doc(file_path)
+
 
 # Main App
 st.title("Audio Demo App with Speech-to-Text")
