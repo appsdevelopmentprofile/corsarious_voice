@@ -60,7 +60,7 @@ def record_voice():
         audio.export(mp3_file_path, format="mp3")
         st.audio(mp3_file_path, format="audio/mp3")
 
-# Function 3: Convert speech from wav file to text using Google Speech Recognition
+# Function 3: Convert speech from "electric_unit_heater.wav" file to text using Google Speech Recognition
 def recognize_speech_from_wav(wav_file):
     recognizer = sr.Recognizer()
 
@@ -76,11 +76,11 @@ def recognize_speech_from_wav(wav_file):
         except sr.RequestError as e:
             return f"Error with the request: {e}"
 
-# Function 4: Process the "engineer_diagnosis.wav" file and create a checklist
+# Function 4: Process the "electric_unit_heater.wav" file and create a checklist
 def process_and_create_checklist():
     st.header("Stage 4: Create Checklist from Recognized Speech")
 
-    wav_file = "engineer_diagnosis.wav"
+    wav_file = "electric_unit_heater.wav"
     
     if os.path.exists(wav_file):
         # Convert the speech in the .wav file to text
@@ -131,8 +131,8 @@ if st.button("Stage 1: Play 'engineer_diagnosis.wav'"):
 if st.button("Stage 2: Record Voice"):
     record_voice()
 
-if st.button("Stage 3: Recognize Speech from 'engineer_diagnosis.wav'"):
-    process_and_create_checklist()
+if st.button("Stage 3: Recognize Speech from 'electric_unit_heater.wav'"):
+    recognize_speech_from_wav("electric_unit_heater.wav")
 
 if st.button("Stage 4: Create Checklist Document"):
     process_and_create_checklist()
