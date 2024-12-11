@@ -4,11 +4,6 @@ import subprocess
 from pydub.utils import which
 from pydub import AudioSegment
 
-
-import streamlit as st
-import os
-import subprocess
-
 # Set the ffmpeg path manually
 os.environ["PATH"] = "/usr/local/bin:" + os.environ["PATH"]
 
