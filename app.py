@@ -95,6 +95,53 @@ def process_electric_unit_heater():
     else:
         st.error(f"File '{wav_file}' not found!")
 
+
+# Function 4: Show progress bar for task completion
+def show_progress_bar():
+    st.header("Function 4: Progress Bar for Task Completion")
+
+    progress_bar = st.progress(0)
+    for i in range(1, 101):
+        progress_bar.progress(i)
+        st.sleep(0.1)  # Simulating a process with a delay
+    st.success("Task Completed!")
+
+# Function 5: Generate a checklist document after phases 1-4
+def generate_checklist_doc():
+    st.header("Function 5: Generate Checklist Document")
+
+    # Show progress bar while the document is being generated
+    progress_bar = st.progress(0)
+    for i in range(1, 101):
+        progress_bar.progress(i)
+        st.sleep(0.05)  # Simulating document generation with a small delay
+    
+    # Create the checklist document
+    doc = Document()
+    doc.add_heading('Field Engineer Questionnaire', 0)
+
+    # Sample checklist content for the document (this should be dynamic based on actual data)
+    checklist_items = [
+        "Check equipment condition",
+        "Verify power connections",
+        "Ensure safety equipment is in place"
+    ]
+
+    # Add items to the checklist
+    for item in checklist_items:
+        p = doc.add_paragraph(style='List Checkmark')  # Adding a checkbox-style paragraph
+        p.add_run(f'☐ {item}')  # Use checkbox character for the checklist item
+
+    # Add a comment section at the bottom
+    doc.add_paragraph("\n")
+    doc.add_heading('Comments', level=2)
+    doc.add_paragraph("Please add any additional comments here:")
+
+    # Save the document
+    doc.save("field_engineer_checklist.docx")
+    st.success("Document 'field_engineer_checklist.docx' created successfully!")
+    st.download_button("Download Checklist", "field_engineer_checklist.docx")
+
 # Main App
 st.title("Audio Demo App with Speech-to-Text")
 
@@ -107,3 +154,9 @@ if st.button("Start Function 2: Record Voice"):
 
 if st.button("Start Function 3: Recognize Speech from 'electric_unit_heater.wav'"):
     process_electric_unit_heater()
+    
+if st.button("Start Function 4: Progress Bar"):
+    show_progress_bar()
+
+if st.button("Start Function 5: Generate Checklist Document"):
+    generate_checklist_doc()
