@@ -1,4 +1,4 @@
-streamlit==1.21.0
+streamlit
 streamlit-audiorecorder==0.1.2
 pydub==0.25.1
 soundfile==0.10.3.post1
