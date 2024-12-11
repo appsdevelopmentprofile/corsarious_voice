@@ -11,10 +11,10 @@ os.environ["FFMPEG_BINARY"] = "/usr/local/bin/"
 # Function to check if ffmpeg is accessible
 def check_ffmpeg():
     try:
-        result = subprocess.run(
-            [os.environ["FFMPEG_BINARY"], "-version"], 
-            stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        result = subprocess.run(['sudo', 'ffmpeg', '-version'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        print(result.stdout.decode())
         )
+
         ffmpeg_version = result.stdout.decode()
         st.write("FFmpeg version detected successfully:")
         st.write(ffmpeg_version)
