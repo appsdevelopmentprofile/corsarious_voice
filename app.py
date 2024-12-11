@@ -93,18 +93,33 @@ def create_checklist_document(sentences):
     document.save(buffer)
     buffer.seek(0)
 
-    # Display first page content in Streamlit
-    st.write("Preview of Checklist Document (First Page):")
-    for para in document.paragraphs[:5]:  # Display first 5 paragraphs as an approximation of the first page
-        st.write(para.text)
+ 
 
-    # Download button
     st.download_button(
         label="Download Checklist Document",
         data=buffer,
         file_name="field_engineer_checklist.docx",
         mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     )
+
+# Function to read and display the content of a .docx file
+def display_docx(file_name):
+    try:
+        # Load the .docx file
+        document = Document(file_name)
+
+        # Display the content of the .docx file
+        st.subheader("Document Preview:")
+        for paragraph in document.paragraphs:
+            st.write(paragraph.text)
+
+    except Exception as e:
+        st.error(f"An error occurred while reading the document:")
+
+if file_name:
+    display_docx(file_name)
+
+
 
 # Main App
 st.title("Audio Processing App with Stages")
