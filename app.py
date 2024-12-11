@@ -7,7 +7,7 @@ import io
 
 # Set the FFMPEG_BINARY and FFPROBE_BINARY to the direct paths
 os.environ["FFMPEG_BINARY"] = "/usr/local/bin/ffmpeg"
-os.environ["FFPROBE_BINARY"] = "/Users/juanrivera/Downloads/ffprobe"
+os.environ["FFPROBE_BINARY"] = "/usr/local/bin/ffprobe"
 
 # Function to check if ffprobe is accessible
 def check_ffprobe():
