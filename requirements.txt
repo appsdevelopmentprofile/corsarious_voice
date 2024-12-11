@@ -3,4 +3,4 @@ streamlit-webrtc
 soundfile
 numpy
 pydub
-st-audiorecorder
+streamlit-audiorecorder
