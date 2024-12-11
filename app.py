@@ -12,7 +12,6 @@ import time
 
 # Set the FFMPEG_BINARY to the direct path of ffmpeg executable
 os.environ["FFMPEG_BINARY"] = "/usr/local/bin/"
-os.environ["FFPROBE_BINARY"] = "/usr/local/bin/"
 
 # Function to check if ffmpeg is accessible
 def check_ffmpeg():
