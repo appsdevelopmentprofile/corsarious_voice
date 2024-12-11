@@ -1,9 +1,11 @@
+import time
 import streamlit as st
 import os
 import subprocess
 from pydub import AudioSegment
 import speech_recognition as sr
 import io
+from docx import Document
 
 # Set the FFMPEG_BINARY to the direct path of ffmpeg executable
 os.environ["FFMPEG_BINARY"] = "/usr/local/bin/ffmpeg"
