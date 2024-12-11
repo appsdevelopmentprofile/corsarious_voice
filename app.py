@@ -1,38 +1,31 @@
 import streamlit as st
 import os
-import subprocess
 from pydub.utils import which
 from pydub import AudioSegment
 
-# Set the ffmpeg path manually
-os.environ["PATH"] = "/usr/local/bin:" + os.environ["PATH"]
 
-# Function to verify if ffmpeg is available in the correct directory
+# Set the FFMPEG_BINARY to the direct path of ffmpeg
+os.environ["FFMPEG_BINARY"] = "/usr/local/bin/ffmpeg"
+
+# Function to check if ffmpeg is accessible
 def check_ffmpeg():
-    ffmpeg_path = '/usr/local/bin/ffmpeg'
-    if os.path.exists(ffmpeg_path) and os.access(ffmpeg_path, os.X_OK):  # Check if ffmpeg exists and is executable
-        try:
-            result = subprocess.run([ffmpeg_path, '-version'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            ffmpeg_version = result.stdout.decode()
-            return ffmpeg_version
-        except FileNotFoundError:
-            return "FFmpeg is not installed or not found in the system path."
-    else:
-        return "FFmpeg is not found in /usr/local/bin or is not executable."
+    try:
+        result = subprocess.run(
+            [os.environ["FFMPEG_BINARY"], "-version"], 
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        )
+        ffmpeg_version = result.stdout.decode()
+        st.write("FFmpeg version detected successfully:")
+        st.write(ffmpeg_version)
+    except FileNotFoundError:
+        st.error("FFmpeg is not installed or not found in the specified path.")
 
-# Streamlit App
-st.title("FFmpeg Path Check")
+# Streamlit app title
+st.title("FFmpeg Integration Example")
 
-# Check FFmpeg status
-ffmpeg_status = check_ffmpeg()
-
-# Display the result in the Streamlit app
-if "FFmpeg is not found" in ffmpeg_status:
-    st.error(ffmpeg_status)  # Show error if ffmpeg is not found
-else:
-    st.success(f"FFmpeg is successfully found! Version info:\n\n{ffmpeg_status}")
-
-
+# Button to check FFmpeg version
+if st.button("Check FFmpeg Version"):
+    check_ffmpeg()
 
 
 # Function 1: Play "engineer_diagnosis.wav" file from GitHub repo (local directory)
