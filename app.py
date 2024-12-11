@@ -93,8 +93,6 @@ def create_checklist_document(sentences):
     document.save(buffer)
     buffer.seek(0)
 
- 
-
     st.download_button(
         label="Download Checklist Document",
         data=buffer,
@@ -102,24 +100,22 @@ def create_checklist_document(sentences):
         mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     )
 
-# Function to read and display the content of a .docx file
-def display_docx(file_name):
-    try:
-        # Load the .docx file
-        document = Document(file_name)
+    # Call the display function here after the document is created
+    display_docx(buffer)
 
-        # Display the content of the .docx file
+# Function to read and display the content of a .docx file
+def display_docx(buffer):
+    try:
+        # Load the .docx file from the buffer
+        document = Document(buffer)
+        
+        # Display the content of the .docx file (first few paragraphs as preview)
         st.subheader("Document Preview:")
-        for paragraph in document.paragraphs:
+        for paragraph in document.paragraphs[:5]:  # Limiting to the first 5 paragraphs for preview
             st.write(paragraph.text)
 
     except Exception as e:
-        st.error(f"An error occurred while reading the document:")
-
-if file_name:
-    display_docx(file_name)
-
-
+        st.error(f"An error occurred while reading the document: {e}")
 
 # Main App
 st.title("Audio Processing App with Stages")
