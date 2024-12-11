@@ -4,3 +4,4 @@ soundfile
 numpy
 sounddevice==0.5.1
 scipy>=1.11.2
+speech_recognition
