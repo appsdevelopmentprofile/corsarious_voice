@@ -1,6 +1,6 @@
 streamlit
+streamlit-webrtc
 soundfile
 numpy
-pyaudio
-streamlit-audiorecorder
 pydub
+st-audiorecorder
