@@ -1,4 +1,4 @@
 streamlit
 pydub==0.25.1
-soundfile==0.10.3
+soundfile
 numpy
