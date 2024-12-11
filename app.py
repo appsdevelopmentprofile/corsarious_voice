@@ -1,25 +1,27 @@
 import streamlit as st
 import os
 import subprocess
-from pydub.utils import which
 from pydub import AudioSegment
 
-
-# Set the FFMPEG_BINARY to the direct path of ffmpeg
+# Set the FFMPEG_BINARY to the direct path of ffmpeg executable
 os.environ["FFMPEG_BINARY"] = "/usr/local/bin/"
 
 # Function to check if ffmpeg is accessible
 def check_ffmpeg():
     try:
-        result = subprocess.run(['sudo', 'ffmpeg', '-version'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        print(result.stdout.decode())
-        )
+        # Run ffmpeg command to check its version
+        result = subprocess.run(['sudo', 'ffmpeg', '-version'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
-        ffmpeg_version = result.stdout.decode()
+        # Display the output in Streamlit
+        ffmpeg_version = result.stdout
         st.write("FFmpeg version detected successfully:")
         st.write(ffmpeg_version)
     except FileNotFoundError:
         st.error("FFmpeg is not installed or not found in the specified path.")
+    except PermissionError:
+        st.error("Permission denied while trying to run ffmpeg with sudo.")
+    except Exception as e:
+        st.error(f"An error occurred: {e}")
 
 # Streamlit app title
 st.title("FFmpeg Integration Example")
@@ -27,7 +29,6 @@ st.title("FFmpeg Integration Example")
 # Button to check FFmpeg version
 if st.button("Check FFmpeg Version"):
     check_ffmpeg()
-
 
 # Function 1: Play "engineer_diagnosis.wav" file from GitHub repo (local directory)
 def play_engineer_diagnosis():
