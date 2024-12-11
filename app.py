@@ -9,7 +9,7 @@ import speech_recognition as sr
 os.environ["FFMPEG_BINARY"] = "/usr/local/bin/"
 
 # Set the path to the ffprobe binary
-os.environ["FFPROBE_BINARY"] = "/Users/juanrivera/Downloads/ffmpeg-7.0.2-i686-static/ffprobe"
+os.environ["FFPROBE_BINARY"] = "/Users/juanrivera/Downloads/ffmpeg-7.0.2-i686-static/"
 
 
 # Function to check if ffmpeg is accessible
