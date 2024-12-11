@@ -81,9 +81,9 @@ def recognize_speech_from_wav(file_path):
             return f"error: {e}"
 
 def play_electric_unit_heater():
-    st.header("Function 3: Play 'electric_unit_heater.wav' and recognize speech")
+    st.header("Function 3: Play 'engineer_equipment.wav' and recognize speech")
 
-    file_path = "electric_unit_heater.wav"
+    file_path = "engineer_equipment.wav"
     if os.path.exists(file_path):
         # Show and play the audio file in the frontend
         st.audio(file_path, format="audio/wav")
